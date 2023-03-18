@@ -8,5 +8,6 @@ data class Expense(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "description") val description: String?,
     @ColumnInfo(name = "category") var category: Category?,
-    @ColumnInfo(name = "withdraw") var withdraw: String?
+    @ColumnInfo(name = "withdraw") var withdraw: String?,
+    @ColumnInfo(name = "date") var date: String?
 )
