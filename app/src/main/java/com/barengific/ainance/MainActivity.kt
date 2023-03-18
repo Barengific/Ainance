@@ -34,10 +34,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-//        val navController = findNavController(R.id.nav_host_fragment_content_main)
-//        appBarConfiguration = AppBarConfiguration(navController.graph)
-//        setupActionBarWithNavController(navController, appBarConfiguration)
-
 
 
         pieChart = findViewById(R.id.pieCharter);
@@ -75,7 +71,8 @@ class MainActivity : AppCompatActivity() {
         l.orientation = Legend.LegendOrientation.VERTICAL
         l.textSize = 16f
         l.setDrawInside(false)
-        l.isEnabled = true
+        l.isEnabled = false
+
     }
 
     private fun loadPieChartData() {
@@ -101,6 +98,7 @@ class MainActivity : AppCompatActivity() {
         data.setValueFormatter(PercentFormatter(pieChart))
         data.setValueTextSize(12f)
         data.setValueTextColor(Color.BLACK)
+
         pieChart!!.data = data
         pieChart!!.invalidate()
         pieChart!!.animateY(1400, Easing.EaseInOutQuad)
