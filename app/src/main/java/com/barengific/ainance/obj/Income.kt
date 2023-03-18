@@ -10,5 +10,6 @@ data class Income(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "description") val description: String?,
     @ColumnInfo(name = "category") var category: Category?,
-    @ColumnInfo(name = "payed") var payed: String?
+    @ColumnInfo(name = "payed") var payed: String?,
+    @ColumnInfo(name = "date") var date: String?
 )
