@@ -61,11 +61,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etPrice">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <AutoCompleteTextView
+            android:id="@+id/AutoCompleteTextview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="none"
-            tools:ignore="TextContrastCheck,TextContrastCheck" />
+            android:layout_height="wrap_content"
+            android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
