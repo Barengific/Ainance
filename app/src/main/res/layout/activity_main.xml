@@ -8,24 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/editTextDescription"
-        android:layout_width="0dp"
-        android:layout_height="57dp"
-        android:hint="aaaaa"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="none"
-            tools:ignore="TextContrastCheck,TextContrastCheck" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pieCharter"
         android:layout_width="match_parent"
@@ -34,5 +16,81 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etPrice"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/price"
+                android:textSize="20sp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    tools:ignore="TextContrastCheck,TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/description"
+                android:textSize="20sp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    tools:ignore="TextContrastCheck,TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etCategory"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/category"
+                android:textSize="20sp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    tools:ignore="TextContrastCheck,TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etDate"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:hint="@string/date"
+                android:textSize="20sp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    tools:ignore="TextContrastCheck,TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </TableRow>
+
+    </TableLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
