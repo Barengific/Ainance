@@ -2,6 +2,7 @@ package com.barengific.ainance
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +17,6 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
-import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +32,21 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+
+        binding.etName.maxWidth = (width/2)
+        binding.etPrice.maxWidth = (width/2)
+        binding.etCategory.maxWidth = (width/2)
+        binding.etDate.maxWidth = (width/2)
+
+        binding.etName.minWidth = (width/2)
+        binding.etPrice.minWidth = (width/2)
+        binding.etCategory.minWidth = (width/2)
+        binding.etDate.minWidth = (width/2)
 
 
 
