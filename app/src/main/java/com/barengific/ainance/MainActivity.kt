@@ -54,17 +54,7 @@ class MainActivity : AppCompatActivity() {
         val items = arrayOf("Item 1", "Item 2", "Item 3")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line ,items)
         binding.actCategory.setAdapter(adapter)
-
-        //
-//
-//        val Subjects = arrayOf("Android", "Flutter", "React Native")
-//        val adapter1 = ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, Subjects)
-//        binding.actCategory.setAdapter(adapter1)
-
-        val Subjects = arrayOf("Android", "Flutter", "React Native")
-        val adapter1 = ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, Subjects)
-        binding.spinner.adapter = adapter1
-
+        
 
         pieChart = binding.pieCharter
         setupPieChart();
