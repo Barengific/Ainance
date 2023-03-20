@@ -1,10 +1,12 @@
 package com.barengific.ainance
 
+import android.R
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.ui.AppBarConfiguration
@@ -49,28 +51,41 @@ class MainActivity : AppCompatActivity() {
         binding.etDate.minWidth = (width/2)
 
 
+        val items = arrayOf("Item 1", "Item 2", "Item 3")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line ,items)
+        binding.actCategory.setAdapter(adapter)
+
+        //
+//
+//        val Subjects = arrayOf("Android", "Flutter", "React Native")
+//        val adapter1 = ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, Subjects)
+//        binding.actCategory.setAdapter(adapter1)
+
+        val Subjects = arrayOf("Android", "Flutter", "React Native")
+        val adapter1 = ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, Subjects)
+        binding.spinner.adapter = adapter1
 
 
-        pieChart = findViewById(R.id.pieCharter);
+        pieChart = binding.pieCharter
         setupPieChart();
         loadPieChartData();
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
+//        menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        return when (item.itemId) {
+//            R.id.action_settings -> true
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 
     private fun setupPieChart() {
         pieChart!!.isDrawHoleEnabled = true
