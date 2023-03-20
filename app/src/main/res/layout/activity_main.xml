@@ -83,18 +83,28 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="none"/>
+            android:inputType="date"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAdd"
-        style="@style/Widget.MaterialComponents.Button.Icon"
-        android:layout_width="0dp"
-        android:layout_height="57dp"
-        android:text="@string/add"
-        android:textSize="16sp"
-        app:icon="@drawable/baseline_add_box_24"
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/btnAdd"-->
+<!--        style="@style/Widget.MaterialComponents.Button.Icon"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="57dp"-->
+<!--        android:text="@string/add"-->
+<!--        android:textSize="16sp"-->
+<!--        app:icon="@drawable/baseline_add_box_24"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/etDate" />-->
+
+    <DatePicker
+        android:id="@+id/datePicker1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etDate" />
