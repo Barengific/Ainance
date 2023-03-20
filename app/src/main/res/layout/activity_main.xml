@@ -54,17 +54,18 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/etCategory"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
         android:layout_height="57dp"
         android:hint="@string/category"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etPrice">
+        app:layout_constraintTop_toBottomOf="@id/etPrice">
 
         <AutoCompleteTextView
-            android:id="@+id/AutoCompleteTextview"
+            android:id="@+id/actCategory"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -82,8 +83,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="none"
-            tools:ignore="TextContrastCheck,TextContrastCheck" />
+            android:inputType="none"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,6 +97,6 @@
         app:icon="@drawable/baseline_add_box_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etCategory" />
+        app:layout_constraintTop_toBottomOf="@id/etDate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
