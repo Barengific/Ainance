@@ -70,43 +70,28 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etDate"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDate"
+        style="@style/Widget.MaterialComponents.Button.Icon"
         android:layout_width="0dp"
         android:layout_height="57dp"
-        android:hint="@string/date"
-        android:textSize="20sp"
+        android:text="@string/date"
+        android:textSize="16sp"
+        app:icon="@drawable/baseline_calendar_month_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/etCategory"
-        app:layout_constraintTop_toBottomOf="@id/etName">
+        app:layout_constraintTop_toBottomOf="@id/etName"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="date"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-<!--    <com.google.android.material.button.MaterialButton-->
-<!--        android:id="@+id/btnAdd"-->
-<!--        style="@style/Widget.MaterialComponents.Button.Icon"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="57dp"-->
-<!--        android:text="@string/add"-->
-<!--        android:textSize="16sp"-->
-<!--        app:icon="@drawable/baseline_add_box_24"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/etDate" />-->
-
-    <DatePicker
-        android:id="@+id/datePicker1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAdd"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="0dp"
+        android:layout_height="57dp"
+        android:text="@string/add"
+        android:textSize="16sp"
+        app:icon="@drawable/baseline_add_box_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etDate" />
+        app:layout_constraintTop_toBottomOf="@id/btnDate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
