@@ -64,12 +64,12 @@ class MainActivity : AppCompatActivity() {
 
 
         //DB impl
-//        val room = Room.databaseBuilder(applicationContext,
-//            AppDatabase::class.java,
-//            "database-names")
-//            .allowMainThreadQueries()
-//            .build()
-//        val expenseDao = room.expenseDao()
+        val room = Room.databaseBuilder(applicationContext,
+            AppDatabase::class.java,
+            "database-names")
+            .allowMainThreadQueries()
+            .build()
+        val expenseDao = room.expenseDao()
 
 
 
@@ -111,12 +111,21 @@ class MainActivity : AppCompatActivity() {
             val aa = Expense(
                 0,
                 binding.etName.editText.toString(),
-                Category(0, binding.actCategory.text.toString(), "/"),
+                binding.actCategory.text.toString(),
                 binding.etPrice.editText.toString(),
                 binding.btnDate.text.toString()
             )
-//            expenseDao.insertAll(aa)
+            expenseDao.insertAll(aa)
 
+//            val arrr = expenseDao.getAll()
+//            val adapter = (arrr)
+//            recyclerView.setHasFixedSize(false)
+//            recyclerView.adapter = adapter
+//            recyclerView.layoutManager = LinearLayoutManager(this)
+//
+//            runOnUiThread {
+//                adapter.notifyDataSetChanged()
+//            }
         }
     }
 
