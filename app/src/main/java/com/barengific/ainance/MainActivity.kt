@@ -96,13 +96,13 @@ class MainActivity : AppCompatActivity() {
         pieChart!!.centerText = "Category"
         pieChart!!.setCenterTextSize(24f)
         pieChart!!.description.isEnabled = false
-//        val l = pieChart!!.legend
+        val l = pieChart!!.legend
 //        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
 //        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
 //        l.orientation = Legend.LegendOrientation.VERTICAL
 //        l.textSize = 16f
 //        l.setDrawInside(false)
-//        l.isEnabled = false
+        l.isEnabled = false
 
     }
 
@@ -112,8 +112,8 @@ class MainActivity : AppCompatActivity() {
         entries.add(PieEntry(0.10f, "Entertainment"))
         entries.add(PieEntry(0.25f, "Electricity and Gas"))
         entries.add(PieEntry(0.3f, "Housing"))
-        entries.add(PieEntry(0.37f, "Cars"))
-        entries.add(PieEntry(0.40f, "School"))
+
+
         val colors: ArrayList<Int> = ArrayList()
         for (color in ColorTemplate.MATERIAL_COLORS) {
             colors.add(color)
