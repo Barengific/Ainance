@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -19,12 +20,14 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.google.android.material.datepicker.MaterialDatePicker
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    val entries: ArrayList<PieEntry> = ArrayList()
 
     private var pieChart: PieChart? = null
 
@@ -43,12 +46,36 @@ class MainActivity : AppCompatActivity() {
         binding.etName.maxWidth = (width/2)
         binding.etPrice.maxWidth = (width/2)
         binding.etCategory.maxWidth = (width/2)
-        binding.etDate.maxWidth = (width/2)
+        binding.btnDate.maxWidth = (width/2)
 
         binding.etName.minWidth = (width/2)
         binding.etPrice.minWidth = (width/2)
         binding.etCategory.minWidth = (width/2)
-        binding.etDate.minWidth = (width/2)
+        binding.btnDate.minWidth = (width/2)
+
+
+
+        ////////////////
+        val mPickDateButton = binding.btnDate
+        val mShowSelectedDateText = binding.btnDate
+
+        val materialDateBuilder: MaterialDatePicker.Builder<*> =
+            MaterialDatePicker.Builder.datePicker()
+
+        materialDateBuilder.setTitleText("SELECT A DATE")
+
+        val materialDatePicker = materialDateBuilder.build()
+
+
+        mPickDateButton.setOnClickListener { // getSupportFragmentManager() to
+            materialDatePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+        }
+
+        materialDatePicker.addOnPositiveButtonClickListener {
+            mShowSelectedDateText.text = materialDatePicker.headerText
+        }
+
+        ///////////////
 
 
         val items = arrayOf("Item 1", "Item 2", "Item 3")
@@ -61,22 +88,6 @@ class MainActivity : AppCompatActivity() {
         loadPieChartData();
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        return when (item.itemId) {
-//            R.id.action_settings -> true
-//            else -> super.onOptionsItemSelected(item)
-//        }
-//    }
-
     private fun setupPieChart() {
         pieChart!!.isDrawHoleEnabled = true
         pieChart!!.setUsePercentValues(true)
@@ -85,18 +96,17 @@ class MainActivity : AppCompatActivity() {
         pieChart!!.centerText = "Category"
         pieChart!!.setCenterTextSize(24f)
         pieChart!!.description.isEnabled = false
-        val l = pieChart!!.legend
-        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
-        l.orientation = Legend.LegendOrientation.VERTICAL
-        l.textSize = 16f
-        l.setDrawInside(false)
-        l.isEnabled = false
+//        val l = pieChart!!.legend
+//        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+//        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+//        l.orientation = Legend.LegendOrientation.VERTICAL
+//        l.textSize = 16f
+//        l.setDrawInside(false)
+//        l.isEnabled = false
 
     }
 
     private fun loadPieChartData() {
-        val entries: ArrayList<PieEntry> = ArrayList()
         entries.add(PieEntry(0.2f, "Food & Dining"))
         entries.add(PieEntry(0.15f, "Medical"))
         entries.add(PieEntry(0.10f, "Entertainment"))
