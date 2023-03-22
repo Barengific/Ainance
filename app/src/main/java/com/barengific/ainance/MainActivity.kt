@@ -1,11 +1,15 @@
 package com.barengific.ainance
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -34,6 +38,21 @@ class MainActivity : AppCompatActivity() {
     val entries: ArrayList<PieEntry> = ArrayList()
 
     private var pieChart: PieChart? = null
+
+    companion object {
+        var pos: Int = 0
+        lateinit var recyclerView: RecyclerView
+        var posis: MutableList<Int> = mutableListOf(-1)
+        var authStatus = false
+        private var instance: MainActivity? = null
+        fun getPosi(): Int = pos
+        fun setPosi(pos: Int) {
+            this.pos = pos
+        }
+        fun applicationContext() : Context {
+            return instance!!.applicationContext
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -103,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         setupPieChart();
         loadPieChartData();
 
-        val recyclerView = binding.rvExpense
+        recyclerView = binding.rvExpense
 
         val arrr = expenseDao.getAll()
         val adapters = RvAdapter(arrr)
@@ -206,13 +225,17 @@ class RvAdapter(private val dataSet: List<Expense>) :
         val textView2: TextView
         val textView3: TextView
         val textView4: TextView
+        val textView5: TextView
+        var ivMore: ImageView
 
         init {
+            ivMore = view.findViewById(R.id.ivMore) as ImageView
             // Define click listener for the ViewHolder's View
             textView1 = view.findViewById(R.id.textView1)
             textView2 = view.findViewById(R.id.textView2)
             textView3 = view.findViewById(R.id.textView3)
             textView4 = view.findViewById(R.id.textView4)
+            textView5 = view.findViewById(R.id.textView5)
         }
     }
 
@@ -228,12 +251,76 @@ class RvAdapter(private val dataSet: List<Expense>) :
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
+        viewHolder.ivMore.setOnClickListener { view ->
+            val wrapper: Context = ContextThemeWrapper(view?.context, R.style.PopupMenu)
+
+            val popup = PopupMenu(wrapper, viewHolder.ivMore)
+            //inflating menu from xml resource
+            popup.inflate(R.menu.rv_menu_context)
+            //adding click listener
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_copy -> {
+                        Log.d("aaa menu", "copy")
+                        val clipboard =
+                            view?.context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip: ClipData =
+                            ClipData.newPlainText("aaaa", viewHolder.textView4.text.toString())
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(view.context, "Text Copied", Toast.LENGTH_LONG).show()
+
+                    }
+                    R.id.menu_delete -> {
+                        val room = view?.context?.let {
+                            Room.databaseBuilder(it, AppDatabase::class.java, "database-names")
+                                .allowMainThreadQueries()
+                                .build()
+                        }
+                        val expenseDao = room?.expenseDao()
+
+                        val description: TextView = viewHolder.textView1
+                        val price: TextView = viewHolder.textView2
+                        val cate: TextView = viewHolder.textView3
+                        val date: TextView = viewHolder.textView4
+                        val eid: TextView = viewHolder.textView5
+
+                        val a = Expense(
+                            eid.id.toInt(),
+                            description.text.toString(),
+                            price.text.toString(),
+                            cate.text.toString(),
+                            date.text.toString()
+                        )
+                        room?.expenseDao()?.delete(a)
+                        val arrr = expenseDao?.getAll()
+                        val adapter = arrr?.let { RvAdapter(it) }
+
+                        MainActivity.recyclerView.setHasFixedSize(false)
+                        MainActivity.recyclerView.adapter = adapter
+                        MainActivity.recyclerView.layoutManager =
+                            LinearLayoutManager(view?.context)
+                        room?.close()
+                        Log.d("aaa menu", "DDDelete")
+
+                    }
+
+                    R.id.menu_cancel -> {
+                        Log.d("aaa menu", "cancel") //TODO
+                    }
+                }
+                true
+            }
+            //displaying the popup
+            popup.show()
+        }
+
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         viewHolder.textView1.text = dataSet[position].description.toString()
         viewHolder.textView2.text = dataSet[position].withdraw.toString()
         viewHolder.textView3.text = dataSet[position].category.toString()
         viewHolder.textView4.text = dataSet[position].date.toString()
+        viewHolder.textView5.text = dataSet[position].id.toString()
     }
 
     // Return the size of your dataset (invoked by the layout manager)
