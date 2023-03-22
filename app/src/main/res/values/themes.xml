@@ -7,4 +7,11 @@
 
     <style name="Theme.Ainance" parent="Base.Theme.Ainance" />
 
+
+
+    <style name="PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:itemBackground">#967b5f</item>
+    </style>
+
 </resources>
