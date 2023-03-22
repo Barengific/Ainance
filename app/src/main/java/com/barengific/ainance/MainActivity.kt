@@ -1,7 +1,5 @@
 package com.barengific.ainance
 
-import android.R
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -14,14 +12,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.barengific.ainance.databinding.ActivityMainBinding
-import com.barengific.ainance.obj.Category
 import com.barengific.ainance.obj.Expense
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -106,26 +103,37 @@ class MainActivity : AppCompatActivity() {
         setupPieChart();
         loadPieChartData();
 
+        val recyclerView = binding.rvExpense
+
+        val arrr = expenseDao.getAll()
+        val adapters = RvAdapter(arrr)
+        recyclerView.setHasFixedSize(false)
+        recyclerView.adapter = adapters
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        runOnUiThread {
+            adapter.notifyDataSetChanged()
+        }
 
         binding.btnAdd.setOnClickListener {
             val aa = Expense(
                 0,
-                binding.etName.editText.toString(),
+                binding.etName.editText?.text.toString(),
                 binding.actCategory.text.toString(),
-                binding.etPrice.editText.toString(),
+                binding.etPrice.editText?.text.toString(),
                 binding.btnDate.text.toString()
             )
             expenseDao.insertAll(aa)
 
-//            val arrr = expenseDao.getAll()
-//            val adapter = (arrr)
-//            recyclerView.setHasFixedSize(false)
-//            recyclerView.adapter = adapter
-//            recyclerView.layoutManager = LinearLayoutManager(this)
-//
-//            runOnUiThread {
-//                adapter.notifyDataSetChanged()
-//            }
+            val arrr = expenseDao.getAll()
+            val adapter = RvAdapter(arrr)
+            recyclerView.setHasFixedSize(false)
+            recyclerView.adapter = adapter
+            recyclerView.layoutManager = LinearLayoutManager(this)
+
+            runOnUiThread {
+                adapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -186,50 +194,50 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-//class RvAdapter(private val dataSet: Array<String>) :
-//    RecyclerView.Adapter<RvAdapter.ViewHolder>() {
-//
-//    /**
-//     * Provide a reference to the type of views that you are using
-//     * (custom ViewHolder)
-//     */
-//    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-//        val textView1: TextView
-//        val textView2: TextView
-//        val textView3: TextView
-//        val textView4: TextView
-//
-//        init {
-//            // Define click listener for the ViewHolder's View
-//            textView1 = view.findViewById(R.id.textView1)
-//            textView2 = view.findViewById(R.id.textView2)
-//            textView3 = view.findViewById(R.id.textView3)
-//            textView4 = view.findViewById(R.id.textView4)
-//        }
-//    }
-//
-//    // Create new views (invoked by the layout manager)
-//    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-//        // Create a new view, which defines the UI of the list item
-//        val view = LayoutInflater.from(viewGroup.context)
-//            .inflate(R.layout.rv_row, viewGroup, false)
-//
-//        return ViewHolder(view)
-//    }
-//
-//    // Replace the contents of a view (invoked by the layout manager)
-//    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-//
-//        // Get element from your dataset at this position and replace the
-//        // contents of the view with that element
-//        viewHolder.textView1.text = dataSet[position]
-//        viewHolder.textView2.text = dataSet[position]
-//        viewHolder.textView3.text = dataSet[position]
-//        viewHolder.textView4.text = dataSet[position]
-//    }
-//
-//    // Return the size of your dataset (invoked by the layout manager)
-//    override fun getItemCount() = dataSet.size
-//
-//}
+class RvAdapter(private val dataSet: List<Expense>) :
+    RecyclerView.Adapter<RvAdapter.ViewHolder>() {
+
+    /**
+     * Provide a reference to the type of views that you are using
+     * (custom ViewHolder)
+     */
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textView1: TextView
+        val textView2: TextView
+        val textView3: TextView
+        val textView4: TextView
+
+        init {
+            // Define click listener for the ViewHolder's View
+            textView1 = view.findViewById(R.id.textView1)
+            textView2 = view.findViewById(R.id.textView2)
+            textView3 = view.findViewById(R.id.textView3)
+            textView4 = view.findViewById(R.id.textView4)
+        }
+    }
+
+    // Create new views (invoked by the layout manager)
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+        // Create a new view, which defines the UI of the list item
+        val view = LayoutInflater.from(viewGroup.context)
+            .inflate(R.layout.rv_row, viewGroup, false)
+
+        return ViewHolder(view)
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+
+        // Get element from your dataset at this position and replace the
+        // contents of the view with that element
+        viewHolder.textView1.text = dataSet[position].description.toString()
+        viewHolder.textView2.text = dataSet[position].withdraw.toString()
+        viewHolder.textView3.text = dataSet[position].category.toString()
+        viewHolder.textView4.text = dataSet[position].date.toString()
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    override fun getItemCount() = dataSet.size
+
+}
 
