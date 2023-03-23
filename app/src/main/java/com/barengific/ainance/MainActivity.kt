@@ -138,8 +138,8 @@ class MainActivity : AppCompatActivity() {
             val aa = Expense(
                 0,
                 binding.etName.editText?.text.toString(),
-                binding.actCategory.text.toString(),
                 binding.etPrice.editText?.text.toString(),
+                binding.actCategory.text.toString(),
                 binding.btnDate.text.toString()
             )
             expenseDao.insertAll(aa)
@@ -216,10 +216,6 @@ class MainActivity : AppCompatActivity() {
 class RvAdapter(private val dataSet: List<Expense>) :
     RecyclerView.Adapter<RvAdapter.ViewHolder>() {
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder)
-     */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView1: TextView
         val textView2: TextView
@@ -285,7 +281,7 @@ class RvAdapter(private val dataSet: List<Expense>) :
                         val eid: TextView = viewHolder.textView5
 
                         val a = Expense(
-                            eid.id.toInt(),
+                            eid.text.toString().toInt(),
                             description.text.toString(),
                             price.text.toString(),
                             cate.text.toString(),
