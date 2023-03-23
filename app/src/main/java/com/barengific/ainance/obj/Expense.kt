@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Expense(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "description") val description: String?,
-    @ColumnInfo(name = "category") var category: String?,
     @ColumnInfo(name = "withdraw") var withdraw: String?,
+    @ColumnInfo(name = "category") var category: String?,
     @ColumnInfo(name = "date") var date: String?
 )
