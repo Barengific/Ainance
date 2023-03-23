@@ -1,9 +1,12 @@
 package com.barengific.ainance
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -11,10 +14,7 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.*
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -156,21 +156,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        var fabState = false
         val fab: View = binding.fab
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .show()
 
-            if(!fabState){
+            if(!binding.fab2.isVisible){
                 binding.fab2.visibility = View.VISIBLE
                 binding.fab3.visibility = View.VISIBLE
                 binding.fab4.visibility = View.VISIBLE
                 binding.tvCat.visibility = View.VISIBLE
                 binding.tvLrange.visibility = View.VISIBLE
                 binding.tvSrange.visibility = View.VISIBLE
-                fabState = true
             }else{
                 binding.fab2.visibility = View.INVISIBLE
                 binding.fab3.visibility = View.INVISIBLE
@@ -178,11 +176,35 @@ class MainActivity : AppCompatActivity() {
                 binding.tvCat.visibility = View.INVISIBLE
                 binding.tvLrange.visibility = View.INVISIBLE
                 binding.tvSrange.visibility = View.INVISIBLE
-                fabState = false
             }
-
-
         }
+
+        binding.fab2.setOnClickListener {
+            onCreateDialog();
+        }
+
+    }
+
+    fun onCreateDialog(): Dialog? {
+        return this?.let {
+            val builder = AlertDialog.Builder(it)
+            // Get the layout inflater
+            val inflater = this.layoutInflater;
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(inflater.inflate(R.layout.dialog_category, null))
+                // Add action buttons
+                .setPositiveButton("add",
+                    DialogInterface.OnClickListener { dialog, id ->
+                        // sign in the user ...
+                    })
+                .setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { dialog, id ->
+
+                    })
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 
     private fun setupPieChart() {
