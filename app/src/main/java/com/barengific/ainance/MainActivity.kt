@@ -156,11 +156,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val fab: View = binding.floatingActionButton
+        var fabState = false
+        val fab: View = binding.fab
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .show()
+
+            if(!fabState){
+                binding.fab2.visibility = View.VISIBLE
+                binding.fab3.visibility = View.VISIBLE
+                binding.fab4.visibility = View.VISIBLE
+                binding.tvCat.visibility = View.VISIBLE
+                binding.tvLrange.visibility = View.VISIBLE
+                binding.tvSrange.visibility = View.VISIBLE
+                fabState = true
+            }else{
+                binding.fab2.visibility = View.INVISIBLE
+                binding.fab3.visibility = View.INVISIBLE
+                binding.fab4.visibility = View.INVISIBLE
+                binding.tvCat.visibility = View.INVISIBLE
+                binding.tvLrange.visibility = View.INVISIBLE
+                binding.tvSrange.visibility = View.INVISIBLE
+                fabState = false
+            }
+
+
         }
     }
 
