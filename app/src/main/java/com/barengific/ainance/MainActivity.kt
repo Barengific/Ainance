@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.barengific.ainance.databinding.ActivityMainBinding
+import com.barengific.ainance.obj.Category
 import com.barengific.ainance.obj.Expense
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
@@ -30,6 +31,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 
 
 class MainActivity : AppCompatActivity() {
@@ -87,6 +89,7 @@ class MainActivity : AppCompatActivity() {
             .allowMainThreadQueries()
             .build()
         val expenseDao = room.expenseDao()
+        val categoryDao = room.categoryDao()
 
 
 
@@ -113,9 +116,9 @@ class MainActivity : AppCompatActivity() {
 
         ///////////////
 
-
-        val items = arrayOf("Item 1", "Item 2", "Item 3")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line ,items)
+        val cats = categoryDao.getAll()
+        val names = cats.map { it.name }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
         binding.actCategory.setAdapter(adapter)
         
 
@@ -186,10 +189,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onCreateDialog(): Dialog? {
+        val room = Room.databaseBuilder(applicationContext,
+            AppDatabase::class.java,
+            "database-names")
+            .allowMainThreadQueries()
+            .build()
+        val categoryDao = room.categoryDao()
+
         return this?.let {
             val builder = AlertDialog.Builder(it)
             // Get the layout inflater
             val inflater = this.layoutInflater;
+            val view: View = inflater.inflate(R.layout.dialog_category, null)
+
+            val recyclerViews = view.findViewById<RecyclerView>(R.id.rv_cate) as RecyclerView
+
+            val arrr = categoryDao.getAll()
+            val adapters = RvCateAdapter(arrr)
+            recyclerViews.setHasFixedSize(false)
+            recyclerViews.adapter = adapters
+            recyclerViews.layoutManager = LinearLayoutManager(this)
+
+            runOnUiThread {
+                adapters.notifyDataSetChanged()
+            }
 
             // Inflate and set the layout for the dialog
             // Pass null as the parent view because its going in the dialog layout
@@ -197,14 +220,33 @@ class MainActivity : AppCompatActivity() {
                 // Add action buttons
                 .setPositiveButton("add",
                     DialogInterface.OnClickListener { dialog, id ->
-                        // sign in the user ...
+
+                        val name = view.findViewById<TextInputLayout>(R.id.cateName) as TextInputLayout
+                        val switchCate = view.findViewById<Switch>(R.id.switchCate)
+                        val switchValue = switchCate.isChecked
+                        val aa = Category(
+                            0,
+                            name.editText?.text.toString(),
+                            switchValue,
+                        )
+                        categoryDao.insertAll(aa)
+
                     })
                 .setNegativeButton(R.string.cancel,
                     DialogInterface.OnClickListener { dialog, id ->
 
                     })
             builder.create()
+
+            builder.show()
+
         } ?: throw IllegalStateException("Activity cannot be null")
+
+        val cats = categoryDao.getAll()
+        val names = cats.map { it.name }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+        binding.actCategory.setAdapter(adapter)
     }
 
     private fun setupPieChart() {
@@ -368,6 +410,105 @@ class RvAdapter(private val dataSet: List<Expense>) :
         viewHolder.textView3.text = dataSet[position].category.toString()
         viewHolder.textView4.text = dataSet[position].date.toString()
         viewHolder.textView5.text = dataSet[position].id.toString()
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    override fun getItemCount() = dataSet.size
+
+}
+
+
+class RvCateAdapter(private val dataSet: List<Category>) :
+    RecyclerView.Adapter<RvCateAdapter.ViewHolder>() {
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textView1: TextView
+        val textView2: TextView
+        val textView3: TextView
+        var ivMore: ImageView
+
+        init {
+            ivMore = view.findViewById(R.id.ivMore) as ImageView
+            textView1 = view.findViewById(R.id.textView1)
+            textView2 = view.findViewById(R.id.textView2)
+            textView3 = view.findViewById(R.id.textView3)
+        }
+    }
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+        // Create a new view, which defines the UI of the list item
+        val view = LayoutInflater.from(viewGroup.context)
+            .inflate(R.layout.rv_cate, viewGroup, false)
+
+        return ViewHolder(view)
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+
+        viewHolder.ivMore.setOnClickListener { view ->
+            val wrapper: Context = ContextThemeWrapper(view?.context, R.style.PopupMenu)
+
+            val popup = PopupMenu(wrapper, viewHolder.ivMore)
+            //inflating menu from xml resource
+            popup.inflate(R.menu.rv_menu_context)
+            //adding click listener
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_copy -> {
+                        Log.d("aaa menu", "copy")
+                        val clipboard =
+                            view?.context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip: ClipData =
+                            ClipData.newPlainText("aaaa", viewHolder.textView2.text.toString())
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(view.context, "Text Copied", Toast.LENGTH_LONG).show()
+
+                    }
+                    R.id.menu_delete -> {
+                        val room = view?.context?.let {
+                            Room.databaseBuilder(it, AppDatabase::class.java, "database-names")
+                                .allowMainThreadQueries()
+                                .build()
+                        }
+                        val categoryDao = room?.categoryDao()
+
+                        val bool: TextView = viewHolder.textView1
+                        val name: TextView = viewHolder.textView2
+                        val id: TextView = viewHolder.textView3
+
+                        val a = Category(
+                            id.text.toString().toInt(),
+                            name.text.toString(),
+                            bool.text.toString().toBoolean()
+                        )
+                        room?.categoryDao()?.delete(a)
+                        val arrr = categoryDao?.getAll()
+                        val adapter = arrr?.let { RvCateAdapter(it) }
+
+                        MainActivity.recyclerView.setHasFixedSize(false)
+                        MainActivity.recyclerView.adapter = adapter
+                        MainActivity.recyclerView.layoutManager =
+                            LinearLayoutManager(view?.context)
+                        room?.close()
+                        Log.d("aaa menu", "DDDelete")
+
+                    }
+
+                    R.id.menu_cancel -> {
+                        Log.d("aaa menu", "cancel") //TODO
+                    }
+                }
+                true
+            }
+            //displaying the popup
+            popup.show()
+        }
+
+        // Get element from your dataset at this position and replace the
+        // contents of the view with that element
+        viewHolder.textView1.text = dataSet[position].id.toString()
+        viewHolder.textView2.text = dataSet[position].name.toString()
+        viewHolder.textView3.text = dataSet[position].type.toString()
     }
 
     // Return the size of your dataset (invoked by the layout manager)
