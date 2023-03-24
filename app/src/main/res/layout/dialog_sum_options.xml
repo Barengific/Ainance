@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <RadioButton
+            android:id="@+id/rb_day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="24 Hours"
+            android:text="Daily" />
+
+        <RadioButton
+            android:id="@+id/rb_week7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Weekly (7 Days)" />
+
+        <RadioButton
+            android:id="@+id/rb_weekStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Weekly (Start of week)" />
+
+        <RadioButton
+            android:id="@+id/rb_year365"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="365 Days"
+            android:text="Yearly (365 days)" />
+
+        <RadioButton
+            android:id="@+id/rb_yearThis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Yearly (This year)" />
+    </RadioGroup>
+</LinearLayout>
