@@ -16,4 +16,6 @@
     <string name="amount">Amount</string>
     <string name="transcation_range">Transcation Range</string>
     <string name="category_name">Category Name</string>
+    <string name="date_from">Date From</string>
+    <string name="date_to">Date To</string>
 </resources>
