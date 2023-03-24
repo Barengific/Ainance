@@ -9,6 +9,7 @@ import android.content.Context.CLIPBOARD_SERVICE
 import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
@@ -31,6 +32,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 
@@ -183,12 +185,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.fab2.setOnClickListener {
-            onCreateDialog();
+            onCreateCategoryDialog();
+        }
+
+        binding.fab3.setOnClickListener {
+            onCreateSumDialog();
+        }
+
+        binding.fab4.setOnClickListener {
+            onCreateRangeDialog();
         }
 
     }
 
-    fun onCreateDialog(): Dialog? {
+    fun onCreateCategoryDialog(): Dialog? {
         val room = Room.databaseBuilder(applicationContext,
             AppDatabase::class.java,
             "database-names")
@@ -196,7 +206,7 @@ class MainActivity : AppCompatActivity() {
             .build()
         val categoryDao = room.categoryDao()
 
-        return this?.let {
+        return this?.let { it ->
             val builder = AlertDialog.Builder(it)
             // Get the layout inflater
             val inflater = this.layoutInflater;
@@ -210,13 +220,9 @@ class MainActivity : AppCompatActivity() {
             recyclerViews.adapter = adapters
             recyclerViews.layoutManager = LinearLayoutManager(this)
 
-            runOnUiThread {
-                adapters.notifyDataSetChanged()
-            }
-
             // Inflate and set the layout for the dialog
-            // Pass null as the parent view because its going in the dialog layout
-            builder.setView(inflater.inflate(R.layout.dialog_category, null))
+            // Pass null as the parent view because it's going in the dialog layout
+            builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("add",
                     DialogInterface.OnClickListener { dialog, id ->
@@ -231,14 +237,24 @@ class MainActivity : AppCompatActivity() {
                         )
                         categoryDao.insertAll(aa)
 
+
+                        val cats = categoryDao.getAll()
+                        val names = cats.map { it.name }
+                        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+                        binding.actCategory.setAdapter(adapter)
+
                     })
                 .setNegativeButton(R.string.cancel,
                     DialogInterface.OnClickListener { dialog, id ->
 
                     })
-            builder.create()
 
-            builder.show()
+            // set adapter before calling show method
+            recyclerViews.adapter = adapters
+
+            builder.create().apply {
+                show()
+            }
 
         } ?: throw IllegalStateException("Activity cannot be null")
 
@@ -247,6 +263,96 @@ class MainActivity : AppCompatActivity() {
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
         binding.actCategory.setAdapter(adapter)
+    }
+
+    fun onCreateSumDialog(): Dialog? {
+        val room = Room.databaseBuilder(applicationContext,
+            AppDatabase::class.java,
+            "database-names")
+            .allowMainThreadQueries()
+            .build()
+        val categoryDao = room.categoryDao()
+
+        return this?.let { it ->
+            val builder = AlertDialog.Builder(it)
+            // Get the layout inflater
+            val inflater = this.layoutInflater;
+            val view: View = inflater.inflate(R.layout.dialog_sum_options, null)
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because it's going in the dialog layout
+            builder.setView(view)
+                // Add action buttons
+                .setPositiveButton("add",
+                    DialogInterface.OnClickListener { dialog, id ->
+
+//                        val name = view.findViewById<TextInputLayout>(R.id.cateName) as TextInputLayout
+//                        val switchCate = view.findViewById<Switch>(R.id.switchCate)
+//                        val switchValue = switchCate.isChecked
+//                        val aa = Category(
+//                            0,
+//                            name.editText?.text.toString(),
+//                            switchValue,
+//                        )
+//                        categoryDao.insertAll(aa)
+
+
+                        val cats = categoryDao.getAll()
+                        val names = cats.map { it.name }
+                        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+                        binding.actCategory.setAdapter(adapter)
+
+                    })
+                .setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { dialog, id ->
+
+                    })
+
+            builder.create().apply {
+                show()
+            }
+
+        } ?: throw IllegalStateException("Activity cannot be null")
+
+    }
+
+    fun onCreateRangeDialog(): Dialog? {
+        return this?.let { it ->
+            val builder = AlertDialog.Builder(it)
+            val inflater = this.layoutInflater;
+            val view: View = inflater.inflate(R.layout.dialog_range_options, null)
+
+            //////////
+            val pickDateEditText = view.findViewById<TextInputLayout>(R.id.etDateFrom)
+            val showSelectedDateText = view.findViewById<TextInputLayout>(R.id.etDateFrom)
+
+            val materialDateBuilder: MaterialDatePicker.Builder<*> =
+                MaterialDatePicker.Builder.datePicker()
+
+            materialDateBuilder.setTitleText("SELECT A FROM DATE")
+
+            val materialDatePicker = materialDateBuilder.build()
+
+            pickDateEditText.setOnClickListener { // getSupportFragmentManager() to
+                materialDatePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+            }
+
+            materialDatePicker.addOnPositiveButtonClickListener {
+                val editable = Editable.Factory.getInstance().newEditable(materialDatePicker.headerText)
+                showSelectedDateText.editText?.text = editable
+            }
+            ///////////////////////////////////////////
+
+            builder.setView(view)
+                .setPositiveButton("Set"
+                ) { _, _ ->
+
+
+                }
+            builder.create().apply {
+                show()
+            }
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 
     private fun setupPieChart() {
@@ -472,9 +578,9 @@ class RvCateAdapter(private val dataSet: List<Category>) :
                         }
                         val categoryDao = room?.categoryDao()
 
-                        val bool: TextView = viewHolder.textView1
+                        val id: TextView = viewHolder.textView1
                         val name: TextView = viewHolder.textView2
-                        val id: TextView = viewHolder.textView3
+                        val bool: TextView = viewHolder.textView3
 
                         val a = Category(
                             id.text.toString().toInt(),
