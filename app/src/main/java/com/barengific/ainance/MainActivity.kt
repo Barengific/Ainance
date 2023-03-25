@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.content.DialogInterface
 import android.graphics.Color
+import android.icu.text.SimpleDateFormat
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.util.DisplayMetrics
@@ -34,6 +36,9 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import java.time.Instant
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -107,13 +112,22 @@ class MainActivity : AppCompatActivity() {
 
         val materialDatePicker = materialDateBuilder.build()
 
-
-        mPickDateButton.setOnClickListener { // getSupportFragmentManager() to
+        mPickDateButton.setOnClickListener {
             materialDatePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
         }
 
-        materialDatePicker.addOnPositiveButtonClickListener {
-            mShowSelectedDateText.text = materialDatePicker.headerText
+        materialDatePicker.addOnPositiveButtonClickListener { selectedDateTimestamp ->
+            val instant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Instant.ofEpochMilli(selectedDateTimestamp as Long)
+            } else {
+                TODO("VERSION.SDK_INT < O")
+            }
+            val selectedDate = Date.from(instant)
+            val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val formattedDate = simpleDateFormat.format(selectedDate)
+
+            mShowSelectedDateText.text = formattedDate
+            Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
         }
 
         ///////////////
@@ -195,6 +209,8 @@ class MainActivity : AppCompatActivity() {
         binding.fab4.setOnClickListener {
             onCreateRangeDialog();
         }
+        val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
+        Log.v("aaaaaaaaaaaaaDATECHOSEN", aaa.toString())
 
     }
 
@@ -279,12 +295,28 @@ class MainActivity : AppCompatActivity() {
             val inflater = this.layoutInflater;
             val view: View = inflater.inflate(R.layout.dialog_sum_options, null)
 
+            var selectedOption = ""
+            val radioGroup = view.findViewById<RadioGroup>(R.id.rg_sum)
+            radioGroup.setOnCheckedChangeListener { group, checkedId ->
+                val radioButton = group.findViewById<RadioButton>(checkedId)
+                selectedOption = radioButton.text as String
+                Toast.makeText(this, "You selected $selectedOption", Toast.LENGTH_LONG).show()
+            }
+
+
             // Inflate and set the layout for the dialog
             // Pass null as the parent view because it's going in the dialog layout
             builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("add",
                     DialogInterface.OnClickListener { dialog, id ->
+
+//                        val radioChosen = view.findViewById<RadioGroup>(R.id.rg_sum)
+//                        val radioText = radioChosen.checkedRadioButtonId;
+//
+                        pieChartText(selectedOption)
+
+
 
 //                        val name = view.findViewById<TextInputLayout>(R.id.cateName) as TextInputLayout
 //                        val switchCate = view.findViewById<Switch>(R.id.switchCate)
@@ -347,6 +379,7 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Set"
                 ) { _, _ ->
 
+//                    val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
 
                 }
             builder.create().apply {
@@ -355,6 +388,16 @@ class MainActivity : AppCompatActivity() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
+    fun totalWithdraw(expense: List<Expense>): Double {
+        val withdraws = expense.map { it.withdraw }
+        val sum = withdraws.sumByDouble { it?.toDoubleOrNull() ?: 0.0 }
+        return sum
+    }
+
+    private fun pieChartText(text: String){
+        pieChart!!.centerText = text
+        Log.v("aaaaaaa", text)
+    }
     private fun setupPieChart() {
         pieChart!!.isDrawHoleEnabled = true
         pieChart!!.setUsePercentValues(true)
@@ -388,7 +431,7 @@ class MainActivity : AppCompatActivity() {
         for (color in ColorTemplate.VORDIPLOM_COLORS) {
             colors.add(color)
         }
-        val dataSet = PieDataSet(entries, "Expense Category")
+        val dataSet = PieDataSet(entries, "ategory")
         dataSet.colors = colors
         val data = PieData(dataSet)
         data.setDrawValues(true)
