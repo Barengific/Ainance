@@ -73,6 +73,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //UI item size setup
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         binding.etCategory.minWidth = (width/2)
         binding.btnDate.minWidth = (width/2)
 
-
+        ////////////////////////////////////////////////////////////////////////////////////////////
         //DB impl
         val room = Room.databaseBuilder(applicationContext,
             AppDatabase::class.java,
@@ -98,10 +100,8 @@ class MainActivity : AppCompatActivity() {
         val expenseDao = room.expenseDao()
         val categoryDao = room.categoryDao()
 
-
-
-
-        ////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //Date button
         val mPickDateButton = binding.btnDate
         val mShowSelectedDateText = binding.btnDate
 
@@ -130,20 +130,22 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
         }
 
-        ///////////////
-
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //Category setup
         val cats = categoryDao.getAll()
         val names = cats.map { it.name }
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
         binding.actCategory.setAdapter(adapter)
-        
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //pieChart
         pieChart = binding.pieCharter
         setupPieChart();
         loadPieChartData();
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //Recyclerview expenses
         recyclerView = binding.rvExpense
-
         val arrr = expenseDao.getAll()
         val adapters = RvAdapter(arrr)
         recyclerView.setHasFixedSize(false)
@@ -154,6 +156,8 @@ class MainActivity : AppCompatActivity() {
             adapter.notifyDataSetChanged()
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //Add expense
         binding.btnAdd.setOnClickListener {
             val aa = Expense(
                 0,
@@ -175,6 +179,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //FloatingActionButton
         val fab: View = binding.fab
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
@@ -211,6 +217,7 @@ class MainActivity : AppCompatActivity() {
         }
         val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
         Log.v("aaaaaaaaaaaaaDATECHOSEN", aaa.toString())
+        getSumByCategory(aaa)
 
     }
 
@@ -355,23 +362,61 @@ class MainActivity : AppCompatActivity() {
             val view: View = inflater.inflate(R.layout.dialog_range_options, null)
 
             //////////
-            val pickDateEditText = view.findViewById<TextInputLayout>(R.id.etDateFrom)
-            val showSelectedDateText = view.findViewById<TextInputLayout>(R.id.etDateFrom)
+            val mPickDateButtonF = view.findViewById<Button>(R.id.btnFrom)
+            val mShowSelectedDateTextF = view.findViewById<Button>(R.id.btnFrom)
 
-            val materialDateBuilder: MaterialDatePicker.Builder<*> =
+            val materialDateBuilderF: MaterialDatePicker.Builder<*> =
                 MaterialDatePicker.Builder.datePicker()
 
-            materialDateBuilder.setTitleText("SELECT A FROM DATE")
+            materialDateBuilderF.setTitleText("SELECT A FROM DATE")
 
-            val materialDatePicker = materialDateBuilder.build()
+            val materialDatePickerF = materialDateBuilderF.build()
 
-            pickDateEditText.setOnClickListener { // getSupportFragmentManager() to
-                materialDatePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+            mPickDateButtonF.setOnClickListener {
+                materialDatePickerF.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
             }
 
-            materialDatePicker.addOnPositiveButtonClickListener {
-                val editable = Editable.Factory.getInstance().newEditable(materialDatePicker.headerText)
-                showSelectedDateText.editText?.text = editable
+            materialDatePickerF.addOnPositiveButtonClickListener { selectedDateTimestamp ->
+                val instant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Instant.ofEpochMilli(selectedDateTimestamp as Long)
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
+                val selectedDate = Date.from(instant)
+                val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                val formattedDate = simpleDateFormat.format(selectedDate)
+
+                mShowSelectedDateTextF.text = formattedDate
+                Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
+            }
+            ///////////////////////////////////////////
+            //////////
+            val mPickDateButtonT = view.findViewById<Button>(R.id.btnTo)
+            val mShowSelectedDateTextT = view.findViewById<Button>(R.id.btnTo)
+
+            val materialDateBuilderT: MaterialDatePicker.Builder<*> =
+                MaterialDatePicker.Builder.datePicker()
+
+            materialDateBuilderT.setTitleText("SELECT A TO DATE")
+
+            val materialDatePickerT = materialDateBuilderT.build()
+
+            mPickDateButtonT.setOnClickListener {
+                materialDatePickerT.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+            }
+
+            materialDatePickerT.addOnPositiveButtonClickListener { selectedDateTimestamp ->
+                val instant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Instant.ofEpochMilli(selectedDateTimestamp as Long)
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
+                val selectedDate = Date.from(instant)
+                val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                val formattedDate = simpleDateFormat.format(selectedDate)
+
+                mShowSelectedDateTextT.text = formattedDate
+                Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
             }
             ///////////////////////////////////////////
 
@@ -381,6 +426,19 @@ class MainActivity : AppCompatActivity() {
 
 //                    val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
 
+                    val room = Room.databaseBuilder(applicationContext,
+                        AppDatabase::class.java,
+                        "database-names")
+                        .allowMainThreadQueries()
+                        .build()
+                    val expenseDao = room.expenseDao()
+                    val categoryDao = room.categoryDao()
+
+                    val dateSpecified = expenseDao.getExpensesInDateRange(
+                        mShowSelectedDateTextF.text as String,
+                        mShowSelectedDateTextT.text as String
+                    )
+
                 }
             builder.create().apply {
                 show()
@@ -388,10 +446,22 @@ class MainActivity : AppCompatActivity() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun totalWithdraw(expense: List<Expense>): Double {
+    fun dateRangeHandler(expense: List<Expense>): Double {
         val withdraws = expense.map { it.withdraw }
+        val categorys = expense.map { it.category }
         val sum = withdraws.sumByDouble { it?.toDoubleOrNull() ?: 0.0 }
         return sum
+    }
+
+    fun getSumByCategory(quantities: List<Expense>): Map<String, Int> {
+        val map = mutableMapOf<String, Int>()
+        for (quantity in quantities) {
+            val category = quantity.category ?: continue
+            val value = quantity.withdraw?.toIntOrNull() ?: continue
+            map[category] = (map[category] ?: 0) + value
+        }
+        Log.v("aaaaaaaaaaaaCATESUMM", map.toString())
+        return map
     }
 
     private fun pieChartText(text: String){
