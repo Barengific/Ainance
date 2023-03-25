@@ -23,6 +23,7 @@ interface ExpenseDao {
     @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
     fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense>
 
+
     @Insert
     fun insertAll(vararg expense: Expense)
 
