@@ -1,36 +1,61 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etDateFrom"
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="57dp"
-        android:hint="@string/date_from"
-        android:textSize="20sp">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="none" />
+            android:layout_height="match_parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="57dp"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="Date From"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/btnFrom"
+                android:layout_width="wrap_content"
+                android:layout_height="57dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="2"
+                android:text="Button"
+                app:cornerRadius="10dp" />
+        </TableRow>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etDateTo"
-        android:layout_width="match_parent"
-        android:layout_height="57dp"
-        android:hint="@string/date_to"
-        android:textSize="20sp">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="none" />
+            android:layout_height="match_parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="57dp"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="Date To"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/btnTo"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="2"
+                android:text="Button"
+                app:cornerRadius="10dp" />
+        </TableRow>
+
+    </TableLayout>
 
 </LinearLayout>
