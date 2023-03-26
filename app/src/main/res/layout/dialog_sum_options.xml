@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="5dp"
     android:orientation="vertical">
 
     <RadioGroup
@@ -19,13 +20,25 @@
             android:id="@+id/rb_week7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Weekly (7 Days)" />
+            android:text="Weekly (7 days)" />
 
         <RadioButton
             android:id="@+id/rb_weekStart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Weekly (Start of week)" />
+
+        <RadioButton
+            android:id="@+id/radioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Monthly (30 days)" />
+
+        <RadioButton
+            android:id="@+id/radioButton2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Monthly (Start month)" />
 
         <RadioButton
             android:id="@+id/rb_year365"
