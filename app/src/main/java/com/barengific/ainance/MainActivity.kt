@@ -11,7 +11,6 @@ import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
@@ -34,7 +33,6 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.time.Instant
 import java.util.*
@@ -138,12 +136,6 @@ class MainActivity : AppCompatActivity() {
         binding.actCategory.setAdapter(adapter)
 
         ////////////////////////////////////////////////////////////////////////////////////////////
-        //pieChart
-        pieChart = binding.pieCharter
-        setupPieChart();
-        loadPieChartData();
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
         //Recyclerview expenses
         recyclerView = binding.rvExpense
         val arrr = expenseDao.getAll()
@@ -155,6 +147,17 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             adapter.notifyDataSetChanged()
         }
+
+        val tet = getSumByCategory(arrr)
+        tet.forEach { entry ->
+            Log.v("aaaaaaaaaaaaaaaaaaaFOREACH___", "${entry.value} + : " + entry.key)
+//            entries.add(entry.value,entry.key)
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //pieChart
+        pieChart = binding.pieCharter
+        setupPieChart(getSumRange(arrr));
+        loadPieChartData(getSumByCategory(arrr));
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
@@ -321,7 +324,7 @@ class MainActivity : AppCompatActivity() {
 //                        val radioChosen = view.findViewById<RadioGroup>(R.id.rg_sum)
 //                        val radioText = radioChosen.checkedRadioButtonId;
 //
-                        pieChartText(selectedOption)
+//                        pieChartText(selectedOption)
 
 
 
@@ -424,20 +427,19 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Set"
                 ) { _, _ ->
 
-//                    val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
-
                     val room = Room.databaseBuilder(applicationContext,
                         AppDatabase::class.java,
                         "database-names")
                         .allowMainThreadQueries()
                         .build()
                     val expenseDao = room.expenseDao()
-                    val categoryDao = room.categoryDao()
 
                     val dateSpecified = expenseDao.getExpensesInDateRange(
                         mShowSelectedDateTextF.text as String,
                         mShowSelectedDateTextT.text as String
                     )
+
+
 
                 }
             builder.create().apply {
@@ -446,34 +448,45 @@ class MainActivity : AppCompatActivity() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun dateRangeHandler(expense: List<Expense>): Double {
-        val withdraws = expense.map { it.withdraw }
-        val categorys = expense.map { it.category }
-        val sum = withdraws.sumByDouble { it?.toDoubleOrNull() ?: 0.0 }
-        return sum
+    fun dateRangeHandler(expense: List<Expense>){
+        //just invoke the piechart and recycle viewer
+        recyclerView = binding.rvExpense
+        val adapters = RvAdapter(expense)
+        recyclerView.setHasFixedSize(false)
+        recyclerView.adapter = adapters
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        runOnUiThread {
+            adapters.notifyDataSetChanged()
+        }
+
+//        pieChart = binding.pieCharter
+//        setupPieChart(getSumRange(expense));
+//        loadPieChartData();
+
     }
 
-    fun getSumByCategory(quantities: List<Expense>): Map<String, Int> {
-        val map = mutableMapOf<String, Int>()
+    private fun getSumRange(expense: List<Expense>): Double {
+        val withdraws = expense.map { it.withdraw }
+        return withdraws.sumByDouble { it?.toDoubleOrNull() ?: 0.0 }
+    }
+
+    private fun getSumByCategory(quantities: List<Expense>): Map<String, Double> {
+        val map = mutableMapOf<String, Double>()
         for (quantity in quantities) {
             val category = quantity.category ?: continue
             val value = quantity.withdraw?.toIntOrNull() ?: continue
-            map[category] = (map[category] ?: 0) + value
+            map[category] = (map[category] ?: 0.0) + value
         }
         Log.v("aaaaaaaaaaaaCATESUMM", map.toString())
         return map
     }
 
-    private fun pieChartText(text: String){
-        pieChart!!.centerText = text
-        Log.v("aaaaaaa", text)
-    }
-    private fun setupPieChart() {
+    private fun setupPieChart(sum: Double) {
         pieChart!!.isDrawHoleEnabled = true
         pieChart!!.setUsePercentValues(true)
         pieChart!!.setEntryLabelTextSize(14f)
         pieChart!!.setEntryLabelColor(Color.BLACK)
-        pieChart!!.centerText = "Category"
+        pieChart!!.centerText = "Total: $sum"
         pieChart!!.setCenterTextSize(24f)
         pieChart!!.description.isEnabled = false
         val l = pieChart!!.legend
@@ -486,12 +499,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun loadPieChartData() {
-        entries.add(PieEntry(0.2f, "Food & Dining"))
-        entries.add(PieEntry(0.15f, "Medical"))
-        entries.add(PieEntry(0.10f, "Entertainment"))
-        entries.add(PieEntry(0.25f, "Electricity and Gas"))
-        entries.add(PieEntry(0.3f, "Housing"))
+    private fun loadPieChartData(expense: Map<String, Double>) {
+//
+        expense.forEach { entry ->
+            entries.add(PieEntry(entry.value.toFloat(),entry.key))
+        }
+
+//        entries.add(PieEntry(0.2f, "Food & Dining"))
+//        entries.add(PieEntry(0.15f, "Medical"))
+//        entries.add(PieEntry(0.10f, "Entertainment"))
+//        entries.add(PieEntry(0.25f, "Electricity and Gas"))
+//        entries.add(PieEntry(0.3f, "Housing"))
 
 
         val colors: ArrayList<Int> = ArrayList()
@@ -635,7 +653,6 @@ class RvAdapter(private val dataSet: List<Expense>) :
     override fun getItemCount() = dataSet.size
 
 }
-
 
 class RvCateAdapter(private val dataSet: List<Category>) :
     RecyclerView.Adapter<RvCateAdapter.ViewHolder>() {
