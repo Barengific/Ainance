@@ -157,12 +157,16 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
         binding.btnAdd.setOnClickListener {
+            val dateString = binding.btnDate.text.toString()
+            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val date = dateFormat.parse(dateString)
+
             val aa = Expense(
                 0,
                 binding.etName.editText?.text.toString(),
                 binding.etPrice.editText?.text.toString(),
                 binding.actCategory.text.toString(),
-                binding.btnDate.text.toString()
+                date
             )
             expenseDao.insertAll(aa)
 
@@ -299,7 +303,7 @@ class MainActivity : AppCompatActivity() {
             radioGroup.setOnCheckedChangeListener { group, checkedId ->
                 val radioButton = group.findViewById<RadioButton>(checkedId)
                 selectedOption = radioButton.text as String
-                Toast.makeText(this, "You selected $selectedOption", Toast.LENGTH_LONG).show()
+
             }
 
 
@@ -308,30 +312,78 @@ class MainActivity : AppCompatActivity() {
             builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("add",
-                    DialogInterface.OnClickListener { dialog, id ->
+                    DialogInterface.OnClickListener { _, _ ->
 
-//                        val radioChosen = view.findViewById<RadioGroup>(R.id.rg_sum)
-//                        val radioText = radioChosen.checkedRadioButtonId;
-//
-//                        pieChartText(selectedOption)
+                        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                        val currentDate = sdf.format(Date())
+                        val calendar = Calendar.getInstance()
+                        calendar.time = Date()
 
+                        var pastDate: String = ""
 
+                        when (selectedOption) {
+                            "Daily" -> {
+                                pastDate = currentDate
+                                Toast.makeText(this, "You selected dailyy: $pastDate", Toast.LENGTH_LONG).show()
 
-//                        val name = view.findViewById<TextInputLayout>(R.id.cateName) as TextInputLayout
-//                        val switchCate = view.findViewById<Switch>(R.id.switchCate)
-//                        val switchValue = switchCate.isChecked
-//                        val aa = Category(
-//                            0,
-//                            name.editText?.text.toString(),
-//                            switchValue,
-//                        )
-//                        categoryDao.insertAll(aa)
+                            }
+                            "Weekly (7 days)" -> {
+                                calendar.add(Calendar.DAY_OF_MONTH, -7)
+                                pastDate = sdf.format(calendar.time)
+                                Toast.makeText(this, "You selected wekly 7days: $pastDate", Toast.LENGTH_LONG).show()
 
+                            }
+                            "Weekly (Start of week)" -> {
+                                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                                calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
+                                val tempDate = calendar.time
+                                pastDate = sdf.format(tempDate)
+                                Toast.makeText(this, "You selected wekly this w: $pastDate", Toast.LENGTH_LONG).show()
 
-                        val cats = categoryDao.getAll()
-                        val names = cats.map { it.name }
-                        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
-                        binding.actCategory.setAdapter(adapter)
+                            }
+                            "Monthly (30 days)" -> {
+                                calendar.add(Calendar.DAY_OF_MONTH, -30)
+                                pastDate = sdf.format(calendar.time)
+                                Toast.makeText(this, "You selected month 30days: $pastDate", Toast.LENGTH_LONG).show()
+
+                            }
+                            "Monthly (Start month)" -> {
+                                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                                val tempDate = calendar.time
+                                pastDate = sdf.format(tempDate)
+                                Toast.makeText(this, "You selected month this w: $pastDate", Toast.LENGTH_LONG).show()
+
+                            }
+                            "Yearly (365 days)" -> {
+                                calendar.add(Calendar.DAY_OF_MONTH, -365)
+                                pastDate = sdf.format(calendar.time)
+                                Toast.makeText(this, "You selected year 365: $pastDate", Toast.LENGTH_LONG).show()
+
+                            }
+                            "Yearly (This year)" -> {
+                                calendar.set(Calendar.MONTH, Calendar.JANUARY)
+                                calendar.set(Calendar.DAY_OF_YEAR, 1)
+                                val tempDate = calendar.time
+                                pastDate = sdf.format(tempDate)
+                                Toast.makeText(this, "You selected year this tear:$pastDate", Toast.LENGTH_LONG).show()
+
+                            }
+                        }
+
+                        val room = Room.databaseBuilder(applicationContext,
+                            AppDatabase::class.java,
+                            "database-names")
+                            .allowMainThreadQueries()
+                            .build()
+                        val expenseDao = room.expenseDao()
+
+                        val dateSpecified = expenseDao.getExpensesInDateRange(
+                            currentDate, pastDate
+                        )
+                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", "from:$pastDate - to:$currentDate")
+                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", dateSpecified.toString())
+
+                        dateRangeHandler(dateSpecified)
 
                     })
                 .setNegativeButton(R.string.cancel,
@@ -491,7 +543,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadPieChartData(expense: Map<String, Double>) {
 
         entries.clear()
-        
+
         expense.forEach { entry ->
             entries.add(PieEntry(entry.value.toFloat(),entry.key))
         }
@@ -594,12 +646,16 @@ class RvAdapter(private val dataSet: List<Expense>) :
                         val date: TextView = viewHolder.textView4
                         val eid: TextView = viewHolder.textView5
 
+                        val dateString = date.text.toString()
+                        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                        val dates = dateFormat.parse(dateString)
+
                         val a = Expense(
                             eid.text.toString().toInt(),
                             description.text.toString(),
                             price.text.toString(),
                             cate.text.toString(),
-                            date.text.toString()
+                            dates
                         )
                         room?.expenseDao()?.delete(a)
                         val arrr = expenseDao?.getAll()
@@ -735,4 +791,3 @@ class RvCateAdapter(private val dataSet: List<Category>) :
     override fun getItemCount() = dataSet.size
 
 }
-
