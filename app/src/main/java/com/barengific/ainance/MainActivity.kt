@@ -148,11 +148,6 @@ class MainActivity : AppCompatActivity() {
             adapter.notifyDataSetChanged()
         }
 
-        val tet = getSumByCategory(arrr)
-        tet.forEach { entry ->
-            Log.v("aaaaaaaaaaaaaaaaaaaFOREACH___", "${entry.value} + : " + entry.key)
-//            entries.add(entry.value,entry.key)
-        }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //pieChart
         pieChart = binding.pieCharter
@@ -186,9 +181,6 @@ class MainActivity : AppCompatActivity() {
         //FloatingActionButton
         val fab: View = binding.fab
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .show()
 
             if(!binding.fab2.isVisible){
                 binding.fab2.visibility = View.VISIBLE
@@ -218,9 +210,6 @@ class MainActivity : AppCompatActivity() {
         binding.fab4.setOnClickListener {
             onCreateRangeDialog();
         }
-        val aaa = room.expenseDao().getExpensesInDateRange("01-03-2023", "05-03-2023")
-        Log.v("aaaaaaaaaaaaaDATECHOSEN", aaa.toString())
-        getSumByCategory(aaa)
 
     }
 
@@ -439,7 +428,10 @@ class MainActivity : AppCompatActivity() {
                         mShowSelectedDateTextT.text as String
                     )
 
+                    dateRangeHandler(dateSpecified)
 
+                }
+                .setNegativeButton("Cancel"){_,_ ->
 
                 }
             builder.create().apply {
@@ -449,8 +441,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun dateRangeHandler(expense: List<Expense>){
-        //just invoke the piechart and recycle viewer
-        recyclerView = binding.rvExpense
         val adapters = RvAdapter(expense)
         recyclerView.setHasFixedSize(false)
         recyclerView.adapter = adapters
@@ -459,9 +449,8 @@ class MainActivity : AppCompatActivity() {
             adapters.notifyDataSetChanged()
         }
 
-//        pieChart = binding.pieCharter
-//        setupPieChart(getSumRange(expense));
-//        loadPieChartData();
+        setupPieChart(getSumRange(expense));
+        loadPieChartData(getSumByCategory(expense));
 
     }
 
@@ -500,17 +489,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadPieChartData(expense: Map<String, Double>) {
-//
+
+        entries.clear()
+        
         expense.forEach { entry ->
             entries.add(PieEntry(entry.value.toFloat(),entry.key))
         }
-
-//        entries.add(PieEntry(0.2f, "Food & Dining"))
-//        entries.add(PieEntry(0.15f, "Medical"))
-//        entries.add(PieEntry(0.10f, "Entertainment"))
-//        entries.add(PieEntry(0.25f, "Electricity and Gas"))
-//        entries.add(PieEntry(0.3f, "Housing"))
-
 
         val colors: ArrayList<Int> = ArrayList()
         for (color in ColorTemplate.MATERIAL_COLORS) {
