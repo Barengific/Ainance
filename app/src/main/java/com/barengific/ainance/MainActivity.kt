@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.content.DialogInterface
 import android.graphics.Color
-import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -34,8 +33,11 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
+
 import java.time.Instant
 import java.util.*
+import java.text.SimpleDateFormat
+
 import kotlin.collections.ArrayList
 
 
@@ -70,6 +72,15 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //Current Date
+        val formatter = SimpleDateFormat("dd-MM-yyyy")
+        val currentDate = Date()
+        val currentDateFormatted = formatter.format(currentDate)
+
+        val date = formatter.parse(currentDateFormatted)
+        val currentDateMilliseconds = date?.time ?: 0
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //UI item size setup
@@ -139,6 +150,14 @@ class MainActivity : AppCompatActivity() {
         //Recyclerview expenses
         recyclerView = binding.rvExpense
         val arrr = expenseDao.getAll()
+
+        for (item in arrr) {
+            val timestamp = item.date?.toLong()
+            val date = Date(timestamp!!)
+            val formattedDate = formatter.format(date)
+            item.date = formattedDate
+        }
+
         val adapters = RvAdapter(arrr)
         recyclerView.setHasFixedSize(false)
         recyclerView.adapter = adapters
@@ -157,20 +176,26 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
         binding.btnAdd.setOnClickListener {
-            val dateString = binding.btnDate.text.toString()
-            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val date = dateFormat.parse(dateString)
+
+            val date = formatter.parse(binding.btnDate.text.toString())
+            val dateMilliseconds = date?.time ?: 0
 
             val aa = Expense(
                 0,
                 binding.etName.editText?.text.toString(),
                 binding.etPrice.editText?.text.toString(),
                 binding.actCategory.text.toString(),
-                binding.btnDate.text.toString().toDate()
+                dateMilliseconds.toString()
             )
             expenseDao.insertAll(aa)
 
             val arrr = expenseDao.getAll()
+            for (item in arrr) {
+                val timestamp = item.date?.toLong()
+                val date = Date(timestamp!!)
+                val formattedDate = formatter.format(date)
+                item.date = formattedDate
+            }
             val adapter = RvAdapter(arrr)
             recyclerView.setHasFixedSize(false)
             recyclerView.adapter = adapter
@@ -179,6 +204,10 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 adapter.notifyDataSetChanged()
             }
+
+            pieChart = binding.pieCharter
+            setupPieChart(getSumRange(arrr));
+            loadPieChartData(getSumByCategory(arrr));
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,6 +243,11 @@ class MainActivity : AppCompatActivity() {
         binding.fab4.setOnClickListener {
             onCreateRangeDialog();
         }
+
+
+
+        Toast.makeText(this, currentDateMilliseconds.toString(), Toast.LENGTH_LONG).show()
+
 
     }
 
@@ -306,9 +340,6 @@ class MainActivity : AppCompatActivity() {
 
             }
 
-
-            // Inflate and set the layout for the dialog
-            // Pass null as the parent view because it's going in the dialog layout
             builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("add",
@@ -377,13 +408,20 @@ class MainActivity : AppCompatActivity() {
                             .build()
                         val expenseDao = room.expenseDao()
 
-                        val dateSpecified = pastDate?.let { it1 ->
-                            currentDate?.let { it2 ->
-                                expenseDao.getExpensesInDateRange(
-                                    it1, it2
-                                )
-                            }
-                        }
+                        val formatter = SimpleDateFormat("dd-MM-yyyy")
+                        val currentDates = Date()
+                        val currentDateFormatted = formatter.format(currentDates)
+
+                        val date = formatter.parse(currentDateFormatted)
+                        val currentDateMilliseconds = date?.time ?: 0
+
+                        val datePast = formatter.parse(pastDate)
+                        val pastDateMilliseconds = datePast?.time ?: 0
+
+                        val dateSpecified =
+                                expenseDao.getExpensesInDateRange(pastDateMilliseconds.toString(),
+                                    currentDateMilliseconds.toString())
+
                         Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", "from:${pastDate.toDate()} - to:${currentDate.toDate()}")
                         Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", dateSpecified.toString())
 
@@ -485,14 +523,17 @@ class MainActivity : AppCompatActivity() {
                         .build()
                     val expenseDao = room.expenseDao()
 
-                    val dateSpecified = mShowSelectedDateTextF.text.toString()?.let { it1 ->
-                        mShowSelectedDateTextT.text.toString()?.let { it2 ->
-                            expenseDao.getExpensesInDateRange(
-                                it1,
-                                it2
-                            )
-                        }
-                    }
+                    val formatter = SimpleDateFormat("dd-MM-yyyy")
+
+                    val date = formatter.parse(mShowSelectedDateTextT.text.toString())
+                    val toDateMilliseconds = date?.time ?: 0
+
+                    val datePast = formatter.parse(mShowSelectedDateTextF.text.toString())
+                    val fromDateMilliseconds = datePast?.time ?: 0
+
+                    val dateSpecified =
+                        expenseDao.getExpensesInDateRange(toDateMilliseconds.toString(),
+                            fromDateMilliseconds.toString())
 
                     if (dateSpecified != null) {
                         dateRangeHandler(dateSpecified)
@@ -509,6 +550,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun dateRangeHandler(expense: List<Expense>){
+        val formatter = SimpleDateFormat("dd-MM-yyyy")
+        
+        for (item in expense) {
+            val timestamp = item.date?.toLong()
+            val date = Date(timestamp!!)
+            val formattedDate = formatter.format(date)
+            item.date = formattedDate
+        }
         val adapters = RvAdapter(expense)
         recyclerView.setHasFixedSize(false)
         recyclerView.adapter = adapters
@@ -662,16 +711,12 @@ class RvAdapter(private val dataSet: List<Expense>) :
                         val date: TextView = viewHolder.textView4
                         val eid: TextView = viewHolder.textView5
 
-                        val dateString = date.text.toString()
-                        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                        val dates = dateFormat.parse(dateString)
-
                         val a = Expense(
                             eid.text.toString().toInt(),
                             description.text.toString(),
                             price.text.toString(),
                             cate.text.toString(),
-                            date.text.toString().toDate()
+                            date.text.toString()
                         )
                         room?.expenseDao()?.delete(a)
                         val arrr = expenseDao?.getAll()
