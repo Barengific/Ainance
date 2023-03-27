@@ -6,7 +6,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -16,11 +15,9 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.*
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import androidx.room.TypeConverter
 import com.barengific.ainance.databinding.ActivityMainBinding
 import com.barengific.ainance.obj.Category
 import com.barengific.ainance.obj.Expense
@@ -43,25 +40,13 @@ import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    val entries: ArrayList<PieEntry> = ArrayList()
+    private val entries: ArrayList<PieEntry> = ArrayList()
 
     private var pieChart: PieChart? = null
 
     companion object {
-        var pos: Int = 0
         lateinit var recyclerView: RecyclerView
-        var posis: MutableList<Int> = mutableListOf(-1)
-        var authStatus = false
-        private var instance: MainActivity? = null
-        fun getPosi(): Int = pos
-        fun setPosi(pos: Int) {
-            this.pos = pos
-        }
-        fun applicationContext() : Context {
-            return instance!!.applicationContext
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +71,6 @@ class MainActivity : AppCompatActivity() {
         //UI item size setup
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
 
         binding.etName.maxWidth = (width/2)
@@ -170,8 +154,8 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //pieChart
         pieChart = binding.pieCharter
-        setupPieChart(getSumRange(arrr));
-        loadPieChartData(getSumByCategory(arrr));
+        setupPieChart(getSumRange(arrr))
+        loadPieChartData(getSumByCategory(arrr))
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
@@ -206,14 +190,14 @@ class MainActivity : AppCompatActivity() {
             }
 
             pieChart = binding.pieCharter
-            setupPieChart(getSumRange(arrr));
-            loadPieChartData(getSumByCategory(arrr));
+            setupPieChart(getSumRange(arrr))
+            loadPieChartData(getSumByCategory(arrr))
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //FloatingActionButton
         val fab: View = binding.fab
-        fab.setOnClickListener { view ->
+        fab.setOnClickListener {
 
             if(!binding.fab2.isVisible){
                 binding.fab2.visibility = View.VISIBLE
@@ -233,15 +217,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.fab2.setOnClickListener {
-            onCreateCategoryDialog();
+            onCreateCategoryDialog()
         }
 
         binding.fab3.setOnClickListener {
-            onCreateSumDialog();
+            onCreateSumDialog()
         }
 
         binding.fab4.setOnClickListener {
-            onCreateRangeDialog();
+            onCreateRangeDialog()
         }
 
 
@@ -251,7 +235,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun onCreateCategoryDialog(): Dialog? {
+    private fun onCreateCategoryDialog(): Dialog {
         val room = Room.databaseBuilder(applicationContext,
             AppDatabase::class.java,
             "database-names")
@@ -259,13 +243,13 @@ class MainActivity : AppCompatActivity() {
             .build()
         val categoryDao = room.categoryDao()
 
-        return this?.let { it ->
+        return this.let { it ->
             val builder = AlertDialog.Builder(it)
-            // Get the layout inflater
-            val inflater = this.layoutInflater;
+
+            val inflater = this.layoutInflater
             val view: View = inflater.inflate(R.layout.dialog_category, null)
 
-            val recyclerViews = view.findViewById<RecyclerView>(R.id.rv_cate) as RecyclerView
+            val recyclerViews = view.findViewById(R.id.rv_cate) as RecyclerView
 
             val arrr = categoryDao.getAll()
             val adapters = RvCateAdapter(arrr)
@@ -273,34 +257,32 @@ class MainActivity : AppCompatActivity() {
             recyclerViews.adapter = adapters
             recyclerViews.layoutManager = LinearLayoutManager(this)
 
-            // Inflate and set the layout for the dialog
-            // Pass null as the parent view because it's going in the dialog layout
             builder.setView(view)
                 // Add action buttons
-                .setPositiveButton("add",
-                    DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton("add"
+                ) { _, _ ->
 
-                        val name = view.findViewById<TextInputLayout>(R.id.cateName) as TextInputLayout
-                        val switchCate = view.findViewById<Switch>(R.id.switchCate)
-                        val switchValue = switchCate.isChecked
-                        val aa = Category(
-                            0,
-                            name.editText?.text.toString(),
-                            switchValue,
-                        )
-                        categoryDao.insertAll(aa)
+                    val name = view.findViewById(R.id.cateName) as TextInputLayout
+                    val switchCate = view.findViewById<Switch>(R.id.switchCate)
+                    val switchValue = switchCate.isChecked
+                    val aa = Category(
+                        0,
+                        name.editText?.text.toString(),
+                        switchValue,
+                    )
+                    categoryDao.insertAll(aa)
 
+                    val cats = categoryDao.getAll()
+                    val names = cats.map { it.name }
+                    val adapter =
+                        ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+                    binding.actCategory.setAdapter(adapter)
 
-                        val cats = categoryDao.getAll()
-                        val names = cats.map { it.name }
-                        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
-                        binding.actCategory.setAdapter(adapter)
+                }
+                .setNegativeButton(R.string.cancel
+                ) { _, _ ->
 
-                    })
-                .setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
-
-                    })
+                }
 
             // set adapter before calling show method
             recyclerViews.adapter = adapters
@@ -310,26 +292,13 @@ class MainActivity : AppCompatActivity() {
             }
 
         } ?: throw IllegalStateException("Activity cannot be null")
-
-        val cats = categoryDao.getAll()
-        val names = cats.map { it.name }
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
-        binding.actCategory.setAdapter(adapter)
     }
 
-    fun onCreateSumDialog(): Dialog? {
-        val room = Room.databaseBuilder(applicationContext,
-            AppDatabase::class.java,
-            "database-names")
-            .allowMainThreadQueries()
-            .build()
-        val categoryDao = room.categoryDao()
-
-        return this?.let { it ->
+    private fun onCreateSumDialog(): Dialog {
+        return this.let {
             val builder = AlertDialog.Builder(it)
-            // Get the layout inflater
-            val inflater = this.layoutInflater;
+
+            val inflater = this.layoutInflater
             val view: View = inflater.inflate(R.layout.dialog_sum_options, null)
 
             var selectedOption = ""
@@ -342,98 +311,90 @@ class MainActivity : AppCompatActivity() {
 
             builder.setView(view)
                 // Add action buttons
-                .setPositiveButton("add",
-                    DialogInterface.OnClickListener { _, _ ->
+                .setPositiveButton("add"
+                ) { _, _ ->
 
-                        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                        val currentDate = sdf.format(Date())
-                        val calendar = Calendar.getInstance()
-                        calendar.time = Date()
+                    val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                    val currentDate = sdf.format(Date())
+                    val calendar = Calendar.getInstance()
+                    calendar.time = Date()
 
-                        var pastDate: String = ""
+                    var pastDate = ""
 
-                        when (selectedOption) {
-                            "Daily" -> {
-                                pastDate = currentDate
-                                Toast.makeText(this, "You selected dailyy: $pastDate", Toast.LENGTH_LONG).show()
+                    when (selectedOption) {
+                        "Daily" -> {
+                            pastDate = currentDate
 
-                            }
-                            "Weekly (7 days)" -> {
-                                calendar.add(Calendar.DAY_OF_MONTH, -7)
-                                pastDate = sdf.format(calendar.time)
-                                Toast.makeText(this, "You selected wekly 7days: $pastDate", Toast.LENGTH_LONG).show()
-
-                            }
-                            "Weekly (Start of week)" -> {
-                                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-                                calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
-                                val tempDate = calendar.time
-                                pastDate = sdf.format(tempDate)
-                                Toast.makeText(this, "You selected wekly this w: $pastDate", Toast.LENGTH_LONG).show()
-
-                            }
-                            "Monthly (30 days)" -> {
-                                calendar.add(Calendar.DAY_OF_MONTH, -30)
-                                pastDate = sdf.format(calendar.time)
-                                Toast.makeText(this, "You selected month 30days: $pastDate", Toast.LENGTH_LONG).show()
-
-                            }
-                            "Monthly (Start month)" -> {
-                                calendar.set(Calendar.DAY_OF_MONTH, 1)
-                                val tempDate = calendar.time
-                                pastDate = sdf.format(tempDate)
-                                Toast.makeText(this, "You selected month this w: $pastDate", Toast.LENGTH_LONG).show()
-
-                            }
-                            "Yearly (365 days)" -> {
-                                calendar.add(Calendar.DAY_OF_MONTH, -365)
-                                pastDate = sdf.format(calendar.time)
-                                Toast.makeText(this, "You selected year 365: $pastDate", Toast.LENGTH_LONG).show()
-
-                            }
-                            "Yearly (This year)" -> {
-                                calendar.set(Calendar.MONTH, Calendar.JANUARY)
-                                calendar.set(Calendar.DAY_OF_YEAR, 1)
-                                val tempDate = calendar.time
-                                pastDate = sdf.format(tempDate)
-                                Toast.makeText(this, "You selected year this tear:$pastDate", Toast.LENGTH_LONG).show()
-
-                            }
                         }
+                        "Weekly (7 days)" -> {
+                            calendar.add(Calendar.DAY_OF_MONTH, -7)
+                            pastDate = sdf.format(calendar.time)
 
-                        val room = Room.databaseBuilder(applicationContext,
-                            AppDatabase::class.java,
-                            "database-names")
-                            .allowMainThreadQueries()
-                            .build()
-                        val expenseDao = room.expenseDao()
-
-                        val formatter = SimpleDateFormat("dd-MM-yyyy")
-                        val currentDates = Date()
-                        val currentDateFormatted = formatter.format(currentDates)
-
-                        val date = formatter.parse(currentDateFormatted)
-                        val currentDateMilliseconds = date?.time ?: 0
-
-                        val datePast = formatter.parse(pastDate)
-                        val pastDateMilliseconds = datePast?.time ?: 0
-
-                        val dateSpecified =
-                                expenseDao.getExpensesInDateRange(pastDateMilliseconds.toString(),
-                                    currentDateMilliseconds.toString())
-
-                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", "from:${pastDate.toDate()} - to:${currentDate.toDate()}")
-                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", dateSpecified.toString())
-
-                        if (dateSpecified != null) {
-                            dateRangeHandler(dateSpecified)
                         }
+                        "Weekly (Start of week)" -> {
+                            calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                            calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
+                            val tempDate = calendar.time
+                            pastDate = sdf.format(tempDate)
 
-                    })
-                .setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
+                        }
+                        "Monthly (30 days)" -> {
+                            calendar.add(Calendar.DAY_OF_MONTH, -30)
+                            pastDate = sdf.format(calendar.time)
 
-                    })
+                        }
+                        "Monthly (Start month)" -> {
+                            calendar.set(Calendar.DAY_OF_MONTH, 1)
+                            val tempDate = calendar.time
+                            pastDate = sdf.format(tempDate)
+
+                        }
+                        "Yearly (365 days)" -> {
+                            calendar.add(Calendar.DAY_OF_MONTH, -365)
+                            pastDate = sdf.format(calendar.time)
+
+                        }
+                        "Yearly (This year)" -> {
+                            calendar.set(Calendar.MONTH, Calendar.JANUARY)
+                            calendar.set(Calendar.DAY_OF_YEAR, 1)
+                            val tempDate = calendar.time
+                            pastDate = sdf.format(tempDate)
+
+                        }
+                    }
+
+                    val room = Room.databaseBuilder(
+                        applicationContext,
+                        AppDatabase::class.java,
+                        "database-names"
+                    )
+                        .allowMainThreadQueries()
+                        .build()
+                    val expenseDao = room.expenseDao()
+
+                    val formatter = SimpleDateFormat("dd-MM-yyyy")
+                    val currentDates = Date()
+                    val currentDateFormatted = formatter.format(currentDates)
+
+                    val date = formatter.parse(currentDateFormatted)
+                    val currentDateMilliseconds = date?.time ?: 0
+
+                    val datePast = formatter.parse(pastDate)
+                    val pastDateMilliseconds = datePast?.time ?: 0
+
+                    val dateSpecified =
+                        expenseDao.getExpensesInDateRange(
+                            pastDateMilliseconds.toString(),
+                            currentDateMilliseconds.toString()
+                        )
+
+                    dateRangeHandler(dateSpecified)
+
+                }
+                .setNegativeButton(R.string.cancel
+                ) { _, _ ->
+
+                }
 
             builder.create().apply {
                 show()
@@ -442,15 +403,11 @@ class MainActivity : AppCompatActivity() {
         } ?: throw IllegalStateException("Activity cannot be null")
 
     }
-    @TypeConverter
-    fun String.toDate(): Date? {
-        return SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(this)
-    }
 
-    fun onCreateRangeDialog(): Dialog? {
-        return this?.let { it ->
+    private fun onCreateRangeDialog(): Dialog {
+        return this.let {
             val builder = AlertDialog.Builder(it)
-            val inflater = this.layoutInflater;
+            val inflater = this.layoutInflater
             val view: View = inflater.inflate(R.layout.dialog_range_options, null)
 
             //////////
@@ -534,11 +491,9 @@ class MainActivity : AppCompatActivity() {
                     val dateSpecified =
                         expenseDao.getExpensesInDateRange(fromDateMilliseconds.toString(),
                             toDateMilliseconds.toString(),
-                            )
+                        )
 
-                    if (dateSpecified != null) {
-                        dateRangeHandler(dateSpecified)
-                    }
+                    dateRangeHandler(dateSpecified)
 
                 }
                 .setNegativeButton("Cancel"){_,_ ->
@@ -550,7 +505,7 @@ class MainActivity : AppCompatActivity() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun dateRangeHandler(expense: List<Expense>){
+    private fun dateRangeHandler(expense: List<Expense>){
         val formatter = SimpleDateFormat("dd-MM-yyyy")
 
         for (item in expense) {
@@ -567,14 +522,14 @@ class MainActivity : AppCompatActivity() {
             adapters.notifyDataSetChanged()
         }
 
-        setupPieChart(getSumRange(expense));
-        loadPieChartData(getSumByCategory(expense));
+        setupPieChart(getSumRange(expense))
+        loadPieChartData(getSumByCategory(expense))
 
     }
 
     private fun getSumRange(expense: List<Expense>): Double {
         val withdraws = expense.map { it.withdraw }
-        return withdraws.sumByDouble { it?.toDoubleOrNull() ?: 0.0 }
+        return withdraws.sumOf { it?.toDoubleOrNull() ?: 0.0 }
     }
 
     private fun getSumByCategory(quantities: List<Expense>): Map<String, Double> {
@@ -584,7 +539,6 @@ class MainActivity : AppCompatActivity() {
             val value = quantity.withdraw?.toIntOrNull() ?: continue
             map[category] = (map[category] ?: 0.0) + value
         }
-        Log.v("aaaaaaaaaaaaCATESUMM", map.toString())
         return map
     }
 
@@ -621,7 +575,7 @@ class MainActivity : AppCompatActivity() {
         for (color in ColorTemplate.VORDIPLOM_COLORS) {
             colors.add(color)
         }
-        val dataSet = PieDataSet(entries, "ategory")
+        val dataSet = PieDataSet(entries, "category")
         dataSet.colors = colors
         val data = PieData(dataSet)
         data.setDrawValues(true)
@@ -637,10 +591,10 @@ class MainActivity : AppCompatActivity() {
     private fun hideSystemBars() {
         val windowInsetsController =
             ViewCompat.getWindowInsetsController(window.decorView) ?: return
-        // Configure the behavior of the hidden system bars
+
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        // Hide both the status bar and the navigation bar
+
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 }
@@ -693,7 +647,7 @@ class RvAdapter(private val dataSet: List<Expense>) :
                         val clipboard =
                             view?.context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                         val clip: ClipData =
-                            ClipData.newPlainText("aaaa", viewHolder.textView4.text.toString())
+                            ClipData.newPlainText("a", viewHolder.textView4.text.toString())
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(view.context, "Text Copied", Toast.LENGTH_LONG).show()
 
@@ -742,8 +696,6 @@ class RvAdapter(private val dataSet: List<Expense>) :
             popup.show()
         }
 
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
         viewHolder.textView1.text = dataSet[position].description.toString()
         viewHolder.textView2.text = dataSet[position].withdraw.toString()
         viewHolder.textView3.text = dataSet[position].category.toString()
@@ -754,10 +706,6 @@ class RvAdapter(private val dataSet: List<Expense>) :
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = dataSet.size
 
-    @TypeConverter
-    fun String.toDate(): Date? {
-        return SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(this)
-    }
 
 }
 
@@ -798,13 +746,6 @@ class RvCateAdapter(private val dataSet: List<Category>) :
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.menu_copy -> {
-                        Log.d("aaa menu", "copy")
-                        val clipboard =
-                            view?.context?.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip: ClipData =
-                            ClipData.newPlainText("aaaa", viewHolder.textView2.text.toString())
-                        clipboard.setPrimaryClip(clip)
-                        Toast.makeText(view.context, "Text Copied", Toast.LENGTH_LONG).show()
 
                     }
                     R.id.menu_delete -> {
@@ -833,7 +774,6 @@ class RvCateAdapter(private val dataSet: List<Category>) :
                         MainActivity.recyclerView.layoutManager =
                             LinearLayoutManager(view?.context)
                         room?.close()
-                        Log.d("aaa menu", "DDDelete")
 
                     }
 
