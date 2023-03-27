@@ -14,4 +14,5 @@ class Converters {
     fun toDate(dateString: String?): Date? {
         return dateString?.let { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(it) }
     }
+
 }
