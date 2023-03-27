@@ -21,6 +21,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import androidx.room.TypeConverter
 import com.barengific.ainance.databinding.ActivityMainBinding
 import com.barengific.ainance.obj.Category
 import com.barengific.ainance.obj.Expense
@@ -32,7 +33,6 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import java.time.Instant
 import java.util.*
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                 binding.etName.editText?.text.toString(),
                 binding.etPrice.editText?.text.toString(),
                 binding.actCategory.text.toString(),
-                date
+                binding.btnDate.text.toString().toDate()
             )
             expenseDao.insertAll(aa)
 
@@ -377,13 +377,19 @@ class MainActivity : AppCompatActivity() {
                             .build()
                         val expenseDao = room.expenseDao()
 
-                        val dateSpecified = expenseDao.getExpensesInDateRange(
-                            currentDate, pastDate
-                        )
-                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", "from:$pastDate - to:$currentDate")
+                        val dateSpecified = pastDate?.let { it1 ->
+                            currentDate?.let { it2 ->
+                                expenseDao.getExpensesInDateRange(
+                                    it1, it2
+                                )
+                            }
+                        }
+                        Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", "from:${pastDate.toDate()} - to:${currentDate.toDate()}")
                         Log.v("aaaaaaaaaaaaaaaaaaaaDATEEETETET", dateSpecified.toString())
 
-                        dateRangeHandler(dateSpecified)
+                        if (dateSpecified != null) {
+                            dateRangeHandler(dateSpecified)
+                        }
 
                     })
                 .setNegativeButton(R.string.cancel,
@@ -397,6 +403,10 @@ class MainActivity : AppCompatActivity() {
 
         } ?: throw IllegalStateException("Activity cannot be null")
 
+    }
+    @TypeConverter
+    fun String.toDate(): Date? {
+        return SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(this)
     }
 
     fun onCreateRangeDialog(): Dialog? {
@@ -475,12 +485,18 @@ class MainActivity : AppCompatActivity() {
                         .build()
                     val expenseDao = room.expenseDao()
 
-                    val dateSpecified = expenseDao.getExpensesInDateRange(
-                        mShowSelectedDateTextF.text as String,
-                        mShowSelectedDateTextT.text as String
-                    )
+                    val dateSpecified = mShowSelectedDateTextF.text.toString()?.let { it1 ->
+                        mShowSelectedDateTextT.text.toString()?.let { it2 ->
+                            expenseDao.getExpensesInDateRange(
+                                it1,
+                                it2
+                            )
+                        }
+                    }
 
-                    dateRangeHandler(dateSpecified)
+                    if (dateSpecified != null) {
+                        dateRangeHandler(dateSpecified)
+                    }
 
                 }
                 .setNegativeButton("Cancel"){_,_ ->
@@ -655,7 +671,7 @@ class RvAdapter(private val dataSet: List<Expense>) :
                             description.text.toString(),
                             price.text.toString(),
                             cate.text.toString(),
-                            dates
+                            date.text.toString().toDate()
                         )
                         room?.expenseDao()?.delete(a)
                         val arrr = expenseDao?.getAll()
@@ -691,6 +707,11 @@ class RvAdapter(private val dataSet: List<Expense>) :
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = dataSet.size
+
+    @TypeConverter
+    fun String.toDate(): Date? {
+        return SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(this)
+    }
 
 }
 
