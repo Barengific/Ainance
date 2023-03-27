@@ -22,19 +22,19 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense WHERE category LIKE :v")
     fun findByExpense(v: String): Expense
 
-//    @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
-//    fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense>
+    @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
+    fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense>
 
 //    @Query("SELECT * FROM Expense WHERE date BETWEEN date(:startDate) AND date(:endDate)")
 //    fun getExpensesInDateRange(startDate: Date, endDate: Date): List<Expense>
 
-    @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
-    fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense> {
-        val format = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-        val startDateObj = format.parse(startDate)
-        val endDateObj = format.parse(endDate)
-        return getExpensesInDateRange(startDateObj.toString(), endDateObj.toString())
-    }
+//    @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
+//    fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense> {
+//        val format = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+//        val startDateObj = format.parse(startDate)
+//        val endDateObj = format.parse(endDate)
+//        return getExpensesInDateRange(startDateObj.toString(), endDateObj.toString())
+//    }
 
     @Insert
     fun insertAll(vararg expense: Expense)
