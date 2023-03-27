@@ -160,38 +160,45 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
         binding.btnAdd.setOnClickListener {
+            if (!binding.btnDate.text.toString().isNullOrEmpty() &&
+                !binding.etName.editText?.text.toString().isNullOrEmpty() &&
+                !binding.etPrice.editText?.text.toString().isNullOrEmpty() &&
+            !binding.actCategory.text.toString().isNullOrEmpty()){
+                val date = formatter.parse(binding.btnDate.text.toString())
+                val dateMilliseconds = date?.time ?: 0
 
-            val date = formatter.parse(binding.btnDate.text.toString())
-            val dateMilliseconds = date?.time ?: 0
+                val aa = Expense(
+                    0,
+                    binding.etName.editText?.text.toString(),
+                    binding.etPrice.editText?.text.toString(),
+                    binding.actCategory.text.toString(),
+                    dateMilliseconds.toString()
+                )
+                expenseDao.insertAll(aa)
 
-            val aa = Expense(
-                0,
-                binding.etName.editText?.text.toString(),
-                binding.etPrice.editText?.text.toString(),
-                binding.actCategory.text.toString(),
-                dateMilliseconds.toString()
-            )
-            expenseDao.insertAll(aa)
+                val arrr = expenseDao.getAll()
+                for (item in arrr) {
+                    val timestamp = item.date?.toLong()
+                    val date = Date(timestamp!!)
+                    val formattedDate = formatter.format(date)
+                    item.date = formattedDate
+                }
+                dateRangeHandler(arrr)
 
-            val arrr = expenseDao.getAll()
-            for (item in arrr) {
-                val timestamp = item.date?.toLong()
-                val date = Date(timestamp!!)
-                val formattedDate = formatter.format(date)
-                item.date = formattedDate
-            }
-            val adapter = RvAdapter(arrr)
-            recyclerView.setHasFixedSize(false)
-            recyclerView.adapter = adapter
-            recyclerView.layoutManager = LinearLayoutManager(this)
-
-            runOnUiThread {
-                adapter.notifyDataSetChanged()
             }
 
-            pieChart = binding.pieCharter
-            setupPieChart(getSumRange(arrr))
-            loadPieChartData(getSumByCategory(arrr))
+//            val adapter = RvAdapter(arrr)
+//            recyclerView.setHasFixedSize(false)
+//            recyclerView.adapter = adapter
+//            recyclerView.layoutManager = LinearLayoutManager(this)
+//
+//            runOnUiThread {
+//                adapter.notifyDataSetChanged()
+//            }
+//
+//            pieChart = binding.pieCharter
+//            setupPieChart(getSumRange(arrr))
+//            loadPieChartData(getSumByCategory(arrr))
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,11 +235,6 @@ class MainActivity : AppCompatActivity() {
             onCreateRangeDialog()
         }
 
-
-
-        Toast.makeText(this, currentDateMilliseconds.toString(), Toast.LENGTH_LONG).show()
-
-
     }
 
     private fun onCreateCategoryDialog(): Dialog {
@@ -265,19 +267,21 @@ class MainActivity : AppCompatActivity() {
                     val name = view.findViewById(R.id.cateName) as TextInputLayout
                     val switchCate = view.findViewById<Switch>(R.id.switchCate)
                     val switchValue = switchCate.isChecked
-                    val aa = Category(
-                        0,
-                        name.editText?.text.toString(),
-                        switchValue,
-                    )
-                    categoryDao.insertAll(aa)
 
-                    val cats = categoryDao.getAll()
-                    val names = cats.map { it.name }
-                    val adapter =
-                        ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
-                    binding.actCategory.setAdapter(adapter)
+                    if(!name.editText?.text.toString().isNullOrEmpty()){
+                        val aa = Category(
+                            0,
+                            name.editText?.text.toString(),
+                            switchValue,
+                        )
+                        categoryDao.insertAll(aa)
 
+                        val cats = categoryDao.getAll()
+                        val names = cats.map { it.name }
+                        val adapter =
+                            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+                        binding.actCategory.setAdapter(adapter)
+                    }
                 }
                 .setNegativeButton(R.string.cancel
                 ) { _, _ ->
