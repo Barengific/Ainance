@@ -532,8 +532,9 @@ class MainActivity : AppCompatActivity() {
                     val fromDateMilliseconds = datePast?.time ?: 0
 
                     val dateSpecified =
-                        expenseDao.getExpensesInDateRange(toDateMilliseconds.toString(),
-                            fromDateMilliseconds.toString())
+                        expenseDao.getExpensesInDateRange(fromDateMilliseconds.toString(),
+                            toDateMilliseconds.toString(),
+                            )
 
                     if (dateSpecified != null) {
                         dateRangeHandler(dateSpecified)
@@ -551,7 +552,7 @@ class MainActivity : AppCompatActivity() {
 
     fun dateRangeHandler(expense: List<Expense>){
         val formatter = SimpleDateFormat("dd-MM-yyyy")
-        
+
         for (item in expense) {
             val timestamp = item.date?.toLong()
             val date = Date(timestamp!!)
