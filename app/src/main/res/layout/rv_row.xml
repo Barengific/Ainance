@@ -22,7 +22,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck"
+            android:contentDescription="@string/copy_image"
+            android:focusable="true" />
 
         <TextView
             android:id="@+id/textView1"
@@ -71,7 +73,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_more_vert_24" />
+            app:srcCompat="@drawable/baseline_more_vert_24"
+            android:contentDescription="@string/more_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

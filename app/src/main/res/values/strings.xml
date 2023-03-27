@@ -18,4 +18,22 @@
     <string name="category_name">Category Name</string>
     <string name="date_from">Date From</string>
     <string name="date_to">Date To</string>
+    <string name="select_date">Select Date</string>
+    <string name="specific_date_range">Specific Date Range</string>
+    <string name="add_category">Add Category</string>
+    <string name="pre_defined_dates">Pre-defined Dates</string>
+    <string name="fab_default">fab_default</string>
+    <string name="fab_specific">fab_specific</string>
+    <string name="pre_defined_range">Pre-defined Range</string>
+    <string name="fab_category">Fab Category</string>
+    <string name="yearly_this_year">Yearly (This year)</string>
+    <string name="yearly_365_days">Yearly (365 days)</string>
+    <string name="monthly_start_month">Monthly (Start month)</string>
+    <string name="monthly_30_days">Monthly (30 days)</string>
+    <string name="weekly_start_of_week">Weekly (Start of week)</string>
+    <string name="weekly_7_days">Weekly (7 days)</string>
+    <string name="daily">Daily</string>
+    <string name="expense_income">Expense/Income</string>
+    <string name="copy_image">Copy Image</string>
+    <string name="more_image">More Image</string>
 </resources>

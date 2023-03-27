@@ -410,7 +410,8 @@ class MainActivity : AppCompatActivity() {
             val inflater = this.layoutInflater
             val view: View = inflater.inflate(R.layout.dialog_range_options, null)
 
-            //////////
+            ////////////////////////////////////////////////////////////////////////////////////////
+            //To Date
             val mPickDateButtonF = view.findViewById<Button>(R.id.btnFrom)
             val mShowSelectedDateTextF = view.findViewById<Button>(R.id.btnFrom)
 
@@ -438,8 +439,8 @@ class MainActivity : AppCompatActivity() {
                 mShowSelectedDateTextF.text = formattedDate
                 Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
             }
-            ///////////////////////////////////////////
-            //////////
+            ////////////////////////////////////////////////////////////////////////////////////////
+            //From Date
             val mPickDateButtonT = view.findViewById<Button>(R.id.btnTo)
             val mShowSelectedDateTextT = view.findViewById<Button>(R.id.btnTo)
 
@@ -467,7 +468,7 @@ class MainActivity : AppCompatActivity() {
                 mShowSelectedDateTextT.text = formattedDate
                 Toast.makeText(this, formattedDate, Toast.LENGTH_LONG).show()
             }
-            ///////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////
 
             builder.setView(view)
                 .setPositiveButton("Set"

@@ -14,8 +14,6 @@ import com.barengific.ainance.obj.Expense
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     companion object {
-        private lateinit var INSTANCE:AppDatabase
-        private lateinit var context: Context
         fun getInstance(con: Context):AppDatabase= Room.databaseBuilder(
             con,
             AppDatabase::class.java,
