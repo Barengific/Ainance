@@ -19,8 +19,8 @@ interface ExpenseDao {
     fun findByDescription(k: String): List<Expense>
     @Query("SELECT * FROM expense WHERE category LIKE :k")
     fun findByCategory(k: String): List<Expense>
-    @Query("SELECT * FROM expense WHERE expense LIKE :v")
-    fun findByExpense(v: String): Expense
+//    @Query("SELECT * FROM expense WHERE expense LIKE :v")
+//    fun findByExpense(v: String): Expense
 
     @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
     fun getExpensesInDateRange(startDate: String, endDate: String): List<Expense>
