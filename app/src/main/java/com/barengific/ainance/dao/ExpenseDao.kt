@@ -16,9 +16,10 @@ interface ExpenseDao {
     fun loadAllByIds(expenseIds: IntArray): List<Expense>
 
     @Query("SELECT * FROM expense WHERE description LIKE :k")
-    fun findByDescription(k: String): Expense
-
-    @Query("SELECT * FROM expense WHERE category LIKE :v")
+    fun findByDescription(k: String): List<Expense>
+    @Query("SELECT * FROM expense WHERE category LIKE :k")
+    fun findByCategory(k: String): List<Expense>
+    @Query("SELECT * FROM expense WHERE expense LIKE :v")
     fun findByExpense(v: String): Expense
 
     @Query("SELECT * FROM Expense WHERE date BETWEEN :startDate AND :endDate")
