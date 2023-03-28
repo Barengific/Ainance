@@ -176,8 +176,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"
         android:background="#154f6b"
-        android:text="@string/pre_defined_dates"
-
+        android:text="@string/search_by_category"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/fab2"
         app:layout_constraintEnd_toStartOf="@+id/fab3" />
@@ -203,9 +202,35 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"
         android:background="#154f6b"
-        android:text="@string/specific_date_range"
+        android:text="@string/pre_defined_dates"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/fab3"
         app:layout_constraintEnd_toStartOf="@+id/fab4" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab5"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        android:contentDescription="@string/fab_specific"
+        android:focusable="true"
+        app:backgroundTint="@drawable/play_bg"
+        app:fabCustomSize="40dp"
+        app:layout_constraintBottom_toTopOf="@id/fab4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_add" />
+
+    <TextView
+        android:id="@+id/tv_lrange2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="25dp"
+        android:background="#154f6b"
+        android:text="@string/specific_date_range"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/fab4"
+        app:layout_constraintEnd_toStartOf="@id/fab5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
