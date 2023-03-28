@@ -84,6 +84,59 @@ class MainActivity : AppCompatActivity() {
         binding.btnDate.minWidth = (width/2)
 
         ////////////////////////////////////////////////////////////////////////////////////////////
+        //shared preference for default view
+        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        val currentDates = sdf.format(Date())
+        val calendar = Calendar.getInstance()
+        calendar.time = Date()
+
+        var pastDate = ""
+        val sharedPreferences = getSharedPreferences("default_view_prefs", Context.MODE_PRIVATE)
+
+        if (sharedPreferences.contains("default_view")) {
+
+            when (sharedPreferences.getString("default_view", "")) {
+                "Daily" -> {
+                    pastDate = currentDates
+                }
+                "Weekly (7 days)" -> {
+                    calendar.add(Calendar.DAY_OF_MONTH, -7)
+                    pastDate = sdf.format(calendar.time)
+                }
+                "Weekly (Start of week)" -> {
+                    calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                    calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
+                    val tempDate = calendar.time
+                    pastDate = sdf.format(tempDate)
+                }
+                "Monthly (30 days)" -> {
+                    calendar.add(Calendar.DAY_OF_MONTH, -30)
+                    pastDate = sdf.format(calendar.time)
+                }
+                "Monthly (Start month)" -> {
+                    calendar.set(Calendar.DAY_OF_MONTH, 1)
+                    val tempDate = calendar.time
+                    pastDate = sdf.format(tempDate)
+                }
+                "Yearly (365 days)" -> {
+                    calendar.add(Calendar.DAY_OF_MONTH, -365)
+                    pastDate = sdf.format(calendar.time)
+                }
+                "Yearly (This year)" -> {
+                    calendar.set(Calendar.MONTH, Calendar.JANUARY)
+                    calendar.set(Calendar.DAY_OF_YEAR, 1)
+                    val tempDate = calendar.time
+                    pastDate = sdf.format(tempDate)
+                }
+            }
+
+        } else {
+            val editor = sharedPreferences.edit()
+            editor.putString("default_view", "Monthly (Start month)")
+            editor.apply()
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
         //DB impl
         val room = Room.databaseBuilder(applicationContext,
             AppDatabase::class.java,
@@ -133,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Recyclerview expenses
         recyclerView = binding.rvExpense
-        val arrr = expenseDao.getAll()
+        val arrr = expenseDao.getExpensesInDateRange(pastDate, currentDates)
 
         for (item in arrr) {
             val timestamp = item.date?.toLong()
@@ -186,19 +239,6 @@ class MainActivity : AppCompatActivity() {
                 dateRangeHandler(arrr)
 
             }
-
-//            val adapter = RvAdapter(arrr)
-//            recyclerView.setHasFixedSize(false)
-//            recyclerView.adapter = adapter
-//            recyclerView.layoutManager = LinearLayoutManager(this)
-//
-//            runOnUiThread {
-//                adapter.notifyDataSetChanged()
-//            }
-//
-//            pieChart = binding.pieCharter
-//            setupPieChart(getSumRange(arrr))
-//            loadPieChartData(getSumByCategory(arrr))
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,6 +353,9 @@ class MainActivity : AppCompatActivity() {
 
             }
 
+            val sharedPreferences = getSharedPreferences("default_view_prefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+
             builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("add"
@@ -328,11 +371,13 @@ class MainActivity : AppCompatActivity() {
                     when (selectedOption) {
                         "Daily" -> {
                             pastDate = currentDate
+                            editor.putString("default_view", "Daily")
 
                         }
                         "Weekly (7 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -7)
                             pastDate = sdf.format(calendar.time)
+                            editor.putString("default_view", "Weekly (7 days)")
 
                         }
                         "Weekly (Start of week)" -> {
@@ -340,22 +385,26 @@ class MainActivity : AppCompatActivity() {
                             calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
+                            editor.putString("default_view", "Weekly (Start of week)")
 
                         }
                         "Monthly (30 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -30)
                             pastDate = sdf.format(calendar.time)
+                            editor.putString("default_view", "Monthly (30 days)")
 
                         }
                         "Monthly (Start month)" -> {
                             calendar.set(Calendar.DAY_OF_MONTH, 1)
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
+                            editor.putString("default_view", "Monthly (Start month)")
 
                         }
                         "Yearly (365 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -365)
                             pastDate = sdf.format(calendar.time)
+                            editor.putString("default_view", "Yearly (365 days)")
 
                         }
                         "Yearly (This year)" -> {
@@ -363,6 +412,7 @@ class MainActivity : AppCompatActivity() {
                             calendar.set(Calendar.DAY_OF_YEAR, 1)
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
+                            editor.putString("default_view", "Yearly (This year)")
 
                         }
                     }
