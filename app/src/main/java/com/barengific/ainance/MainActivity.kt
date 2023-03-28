@@ -42,17 +42,82 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val entries: ArrayList<PieEntry> = ArrayList()
-
-    private var pieChart: PieChart? = null
 
     companion object {
         lateinit var recyclerView: RecyclerView
+        private var instance: MainActivity? = null
+        val entries: ArrayList<PieEntry> = ArrayList()
+
+        fun applicationContext() : Context {
+            return instance!!.applicationContext
+        }
+
+        var pieChart: PieChart? = null
+        fun setupPieChart(sum: Double) {
+            pieChart!!.isDrawHoleEnabled = true
+            pieChart!!.setUsePercentValues(true)
+            pieChart!!.setEntryLabelTextSize(14f)
+            pieChart!!.setEntryLabelColor(Color.BLACK)
+            pieChart!!.centerText = "Total: $sum"
+            pieChart!!.setCenterTextSize(24f)
+            pieChart!!.description.isEnabled = false
+            val l = pieChart!!.legend
+//        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+//        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+//        l.orientation = Legend.LegendOrientation.VERTICAL
+//        l.textSize = 16f
+//        l.setDrawInside(false)
+            l.isEnabled = false
+
+        }
+
+        fun loadPieChartData(expense: Map<String, Double>) {
+            entries.clear()
+            expense.forEach { entry ->
+                entries.add(PieEntry(entry.value.toFloat(),entry.key))
+            }
+
+            val colors: ArrayList<Int> = ArrayList()
+            for (color in ColorTemplate.MATERIAL_COLORS) {
+                colors.add(color)
+            }
+            for (color in ColorTemplate.VORDIPLOM_COLORS) {
+                colors.add(color)
+            }
+            val dataSet = PieDataSet(entries, "category")
+            dataSet.colors = colors
+            val data = PieData(dataSet)
+            data.setDrawValues(true)
+            data.setValueFormatter(PercentFormatter(pieChart))
+            data.setValueTextSize(12f)
+            data.setValueTextColor(Color.BLACK)
+
+            pieChart!!.data = data
+            pieChart!!.invalidate()
+            pieChart!!.animateY(1400, Easing.EaseInOutQuad)
+        }
+
+        fun getSumRange(expense: List<Expense>): Double {
+            val withdraws = expense.map { it.withdraw }
+            return withdraws.sumOf { it?.toDoubleOrNull() ?: 0.0 }
+        }
+
+        fun getSumByCategory(quantities: List<Expense>): Map<String, Double> {
+            val map = mutableMapOf<String, Double>()
+            for (quantity in quantities) {
+                val category = quantity.category ?: continue
+                val value = quantity.withdraw?.toIntOrNull() ?: continue
+                map[category] = (map[category] ?: 0.0) + value
+            }
+            return map
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
+
+        instance = this
 
         hideSystemBars()
 
@@ -448,7 +513,7 @@ class MainActivity : AppCompatActivity() {
 
             builder.setView(view)
                 // Add action buttons
-                .setPositiveButton("add"
+                .setPositiveButton("Search"
                 ) { _, _ ->
 
                     val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
@@ -660,8 +725,6 @@ class MainActivity : AppCompatActivity() {
     private fun dateRangeHandler(expense: List<Expense>){
         val formatter = SimpleDateFormat("dd-MM-yyyy")
 
-        Log.v("aaaaaaainDateHandler", expense.toString())
-
         for (item in expense) {
             val timestamp = item.date?.toLong()
             val date = Date(timestamp!!)
@@ -681,66 +744,64 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getSumRange(expense: List<Expense>): Double {
-        val withdraws = expense.map { it.withdraw }
-        return withdraws.sumOf { it?.toDoubleOrNull() ?: 0.0 }
-    }
+//    private fun getSumRange(expense: List<Expense>): Double {
+//        val withdraws = expense.map { it.withdraw }
+//        return withdraws.sumOf { it?.toDoubleOrNull() ?: 0.0 }
+//    }
+//
+//    private fun getSumByCategory(quantities: List<Expense>): Map<String, Double> {
+//        val map = mutableMapOf<String, Double>()
+//        for (quantity in quantities) {
+//            val category = quantity.category ?: continue
+//            val value = quantity.withdraw?.toIntOrNull() ?: continue
+//            map[category] = (map[category] ?: 0.0) + value
+//        }
+//        return map
+//    }
 
-    private fun getSumByCategory(quantities: List<Expense>): Map<String, Double> {
-        val map = mutableMapOf<String, Double>()
-        for (quantity in quantities) {
-            val category = quantity.category ?: continue
-            val value = quantity.withdraw?.toIntOrNull() ?: continue
-            map[category] = (map[category] ?: 0.0) + value
-        }
-        return map
-    }
+//    private fun setupPieChart(sum: Double) {
+//        pieChart!!.isDrawHoleEnabled = true
+//        pieChart!!.setUsePercentValues(true)
+//        pieChart!!.setEntryLabelTextSize(14f)
+//        pieChart!!.setEntryLabelColor(Color.BLACK)
+//        pieChart!!.centerText = "Total: $sum"
+//        pieChart!!.setCenterTextSize(24f)
+//        pieChart!!.description.isEnabled = false
+//        val l = pieChart!!.legend
+////        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+////        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+////        l.orientation = Legend.LegendOrientation.VERTICAL
+////        l.textSize = 16f
+////        l.setDrawInside(false)
+//        l.isEnabled = false
+//
+//    }
 
-    private fun setupPieChart(sum: Double) {
-        pieChart!!.isDrawHoleEnabled = true
-        pieChart!!.setUsePercentValues(true)
-        pieChart!!.setEntryLabelTextSize(14f)
-        pieChart!!.setEntryLabelColor(Color.BLACK)
-        pieChart!!.centerText = "Total: $sum"
-        pieChart!!.setCenterTextSize(24f)
-        pieChart!!.description.isEnabled = false
-        val l = pieChart!!.legend
-//        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-//        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
-//        l.orientation = Legend.LegendOrientation.VERTICAL
-//        l.textSize = 16f
-//        l.setDrawInside(false)
-        l.isEnabled = false
-
-    }
-
-    private fun loadPieChartData(expense: Map<String, Double>) {
-
-        entries.clear()
-
-        expense.forEach { entry ->
-            entries.add(PieEntry(entry.value.toFloat(),entry.key))
-        }
-
-        val colors: ArrayList<Int> = ArrayList()
-        for (color in ColorTemplate.MATERIAL_COLORS) {
-            colors.add(color)
-        }
-        for (color in ColorTemplate.VORDIPLOM_COLORS) {
-            colors.add(color)
-        }
-        val dataSet = PieDataSet(entries, "category")
-        dataSet.colors = colors
-        val data = PieData(dataSet)
-        data.setDrawValues(true)
-        data.setValueFormatter(PercentFormatter(pieChart))
-        data.setValueTextSize(12f)
-        data.setValueTextColor(Color.BLACK)
-
-        pieChart!!.data = data
-        pieChart!!.invalidate()
-        pieChart!!.animateY(1400, Easing.EaseInOutQuad)
-    }
+//    private fun loadPieChartData(expense: Map<String, Double>) {
+//        entries.clear()
+//        expense.forEach { entry ->
+//            entries.add(PieEntry(entry.value.toFloat(),entry.key))
+//        }
+//
+//        val colors: ArrayList<Int> = ArrayList()
+//        for (color in ColorTemplate.MATERIAL_COLORS) {
+//            colors.add(color)
+//        }
+//        for (color in ColorTemplate.VORDIPLOM_COLORS) {
+//            colors.add(color)
+//        }
+//        val dataSet = PieDataSet(entries, "category")
+//        dataSet.colors = colors
+//        val data = PieData(dataSet)
+//        data.setDrawValues(true)
+//        data.setValueFormatter(PercentFormatter(pieChart))
+//        data.setValueTextSize(12f)
+//        data.setValueTextColor(Color.BLACK)
+//
+//        pieChart!!.data = data
+//        pieChart!!.invalidate()
+//        pieChart!!.animateY(1400, Easing.EaseInOutQuad)
+//    }
 
     private fun hideSystemBars() {
         val windowInsetsController =
@@ -829,8 +890,32 @@ class RvAdapter(private val dataSet: List<Expense>) :
                         )
                         room?.expenseDao()?.delete(a)
                         val arrr = expenseDao?.getAll()
-                        val adapter = arrr?.let { RvAdapter(it) }
 
+                        val formatter = SimpleDateFormat("dd-MM-yyyy")
+
+                        if (arrr != null) {
+                            for (item in arrr) {
+                                val timestamp = item.date?.toLong()
+                                val date = Date(timestamp!!)
+                                val formattedDate = formatter.format(date)
+                                item.date = formattedDate
+                            }
+                        }
+                        val adapters = arrr?.let { RvAdapter(it) }
+                        MainActivity.recyclerView.setHasFixedSize(false)
+                        MainActivity.recyclerView.adapter = adapters
+                        MainActivity.recyclerView.layoutManager = LinearLayoutManager(
+                            MainActivity.applicationContext())
+
+                        adapters?.notifyDataSetChanged()
+
+                        arrr?.let { MainActivity.getSumRange(it) }
+                            ?.let { MainActivity.setupPieChart(it) }
+                        arrr?.let { MainActivity.getSumByCategory(it) }
+                            ?.let { MainActivity.loadPieChartData(it) }
+
+                        val adapter = arrr?.let { RvAdapter(it) }
+                        
                         MainActivity.recyclerView.setHasFixedSize(false)
                         MainActivity.recyclerView.adapter = adapter
                         MainActivity.recyclerView.layoutManager =
