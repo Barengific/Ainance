@@ -10,8 +10,10 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/cateName"
-        android:layout_width="250dp"
+        android:layout_width="match_parent"
         android:layout_height="57dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
         android:hint="@string/category_name"
         android:textSize="20sp">
 
@@ -21,13 +23,5 @@
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
-
-    <Switch
-        android:id="@+id/switchCate"
-        android:layout_width="250dp"
-        android:layout_height="57dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/expense_income"
-        android:textSize="20sp" />
 
 </LinearLayout>
