@@ -915,7 +915,7 @@ class RvAdapter(private val dataSet: List<Expense>) :
                             ?.let { MainActivity.loadPieChartData(it) }
 
                         val adapter = arrr?.let { RvAdapter(it) }
-                        
+
                         MainActivity.recyclerView.setHasFixedSize(false)
                         MainActivity.recyclerView.adapter = adapter
                         MainActivity.recyclerView.layoutManager =
