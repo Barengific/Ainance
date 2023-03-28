@@ -7,6 +7,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -93,11 +94,13 @@ class MainActivity : AppCompatActivity() {
         var pastDate = ""
         val sharedPreferences = getSharedPreferences("default_view_prefs", Context.MODE_PRIVATE)
 
+        val value = sharedPreferences.getString("default_view", "")
+
         if (sharedPreferences.contains("default_view")) {
 
-            when (sharedPreferences.getString("default_view", "")) {
+            when (value.toString()) {
                 "Daily" -> {
-                    pastDate = currentDates
+                    pastDate = currentDateFormatted
                 }
                 "Weekly (7 days)" -> {
                     calendar.add(Calendar.DAY_OF_MONTH, -7)
@@ -134,7 +137,15 @@ class MainActivity : AppCompatActivity() {
             val editor = sharedPreferences.edit()
             editor.putString("default_view", "Monthly (Start month)")
             editor.apply()
+
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            val tempDate = calendar.time
+            pastDate = sdf.format(tempDate)
+
         }
+
+        val datePast = formatter.parse(pastDate)
+        val pastDateMilliseconds = datePast?.time ?: 0
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //DB impl
@@ -186,29 +197,37 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Recyclerview expenses
         recyclerView = binding.rvExpense
-        val arrr = expenseDao.getExpensesInDateRange(pastDate, currentDates)
+        pieChart = binding.pieCharter
+        val arrr = expenseDao.getExpensesInDateRange(pastDateMilliseconds.toString(),
+                                                     currentDateMilliseconds.toString())
 
-        for (item in arrr) {
-            val timestamp = item.date?.toLong()
-            val date = Date(timestamp!!)
-            val formattedDate = formatter.format(date)
-            item.date = formattedDate
-        }
 
-        val adapters = RvAdapter(arrr)
-        recyclerView.setHasFixedSize(false)
-        recyclerView.adapter = adapters
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        runOnUiThread {
-            adapter.notifyDataSetChanged()
-        }
+        Log.v("aaaaaaaaaaaaQQQQQQQQQQQq", pastDateMilliseconds.toString())
+        Log.v("aaaaaaaaaaaaQQQQQQQQQQQq", currentDateMilliseconds.toString())
+
+        dateRangeHandler(arrr)
+//        for (item in arrr) {
+//            val timestamp = item.date?.toLong()
+//            val date = Date(timestamp!!)
+//            val formattedDate = formatter.format(date)
+//            item.date = formattedDate
+//        }
+//
+//        val adapters = RvAdapter(arrr)
+//        recyclerView.setHasFixedSize(false)
+//        recyclerView.adapter = adapters
+//        recyclerView.layoutManager = LinearLayoutManager(this)
+//
+//        runOnUiThread {
+//            adapter.notifyDataSetChanged()
+//        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //pieChart
-        pieChart = binding.pieCharter
-        setupPieChart(getSumRange(arrr))
-        loadPieChartData(getSumByCategory(arrr))
+//        pieChart = binding.pieCharter
+//        setupPieChart(getSumRange(arrr))
+//        loadPieChartData(getSumByCategory(arrr))
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Add expense
@@ -216,7 +235,8 @@ class MainActivity : AppCompatActivity() {
             if (!binding.btnDate.text.toString().isNullOrEmpty() &&
                 !binding.etName.editText?.text.toString().isNullOrEmpty() &&
                 !binding.etPrice.editText?.text.toString().isNullOrEmpty() &&
-            !binding.actCategory.text.toString().isNullOrEmpty()){
+                !binding.actCategory.text.toString().isNullOrEmpty()){
+
                 val date = formatter.parse(binding.btnDate.text.toString())
                 val dateMilliseconds = date?.time ?: 0
 
@@ -230,12 +250,6 @@ class MainActivity : AppCompatActivity() {
                 expenseDao.insertAll(aa)
 
                 val arrr = expenseDao.getAll()
-                for (item in arrr) {
-                    val timestamp = item.date?.toLong()
-                    val date = Date(timestamp!!)
-                    val formattedDate = formatter.format(date)
-                    item.date = formattedDate
-                }
                 dateRangeHandler(arrr)
 
             }
@@ -250,15 +264,19 @@ class MainActivity : AppCompatActivity() {
                 binding.fab2.visibility = View.VISIBLE
                 binding.fab3.visibility = View.VISIBLE
                 binding.fab4.visibility = View.VISIBLE
+                binding.fab5.visibility = View.VISIBLE
                 binding.tvCat.visibility = View.VISIBLE
                 binding.tvLrange.visibility = View.VISIBLE
+                binding.tvLrange2.visibility = View.VISIBLE
                 binding.tvSrange.visibility = View.VISIBLE
             }else{
                 binding.fab2.visibility = View.INVISIBLE
                 binding.fab3.visibility = View.INVISIBLE
                 binding.fab4.visibility = View.INVISIBLE
+                binding.fab5.visibility = View.INVISIBLE
                 binding.tvCat.visibility = View.INVISIBLE
                 binding.tvLrange.visibility = View.INVISIBLE
+                binding.tvLrange2.visibility = View.INVISIBLE
                 binding.tvSrange.visibility = View.INVISIBLE
             }
         }
@@ -276,6 +294,30 @@ class MainActivity : AppCompatActivity() {
         }
         binding.fab5.setOnClickListener {
             onCreateRangeDialog()
+        }
+
+        val contentView = binding.root
+        contentView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            contentView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = contentView.rootView.height
+            val keyboardHeight = screenHeight - rect.bottom
+
+            if (keyboardHeight > screenHeight * 0.15) {
+                // Soft keyboard is visible, hide the fab
+                binding.fab.visibility = View.INVISIBLE
+                binding.fab2.visibility = View.INVISIBLE
+                binding.fab3.visibility = View.INVISIBLE
+                binding.fab4.visibility = View.INVISIBLE
+                binding.fab5.visibility = View.INVISIBLE
+                binding.tvCat.visibility = View.INVISIBLE
+                binding.tvLrange.visibility = View.INVISIBLE
+                binding.tvLrange2.visibility = View.INVISIBLE
+                binding.tvSrange.visibility = View.INVISIBLE
+            }else {
+                // Soft keyboard is not visible, show the fab
+                binding.fab.visibility = View.VISIBLE
+            }
         }
 
     }
@@ -308,14 +350,12 @@ class MainActivity : AppCompatActivity() {
                 ) { _, _ ->
 
                     val name = view.findViewById(R.id.cateName) as TextInputLayout
-                    val switchCate = view.findViewById<Switch>(R.id.switchCate)
-                    val switchValue = switchCate.isChecked
 
                     if(!name.editText?.text.toString().isNullOrEmpty()){
                         val aa = Category(
                             0,
                             name.editText?.text.toString(),
-                            switchValue,
+                            false,
                         )
                         categoryDao.insertAll(aa)
 
@@ -422,12 +462,14 @@ class MainActivity : AppCompatActivity() {
                         "Daily" -> {
                             pastDate = currentDate
                             editor.putString("default_view", "Daily")
+                            editor.apply()
 
                         }
                         "Weekly (7 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -7)
                             pastDate = sdf.format(calendar.time)
                             editor.putString("default_view", "Weekly (7 days)")
+                            editor.apply()
 
                         }
                         "Weekly (Start of week)" -> {
@@ -436,12 +478,14 @@ class MainActivity : AppCompatActivity() {
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
                             editor.putString("default_view", "Weekly (Start of week)")
+                            editor.apply()
 
                         }
                         "Monthly (30 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -30)
                             pastDate = sdf.format(calendar.time)
                             editor.putString("default_view", "Monthly (30 days)")
+                            editor.apply()
 
                         }
                         "Monthly (Start month)" -> {
@@ -449,12 +493,14 @@ class MainActivity : AppCompatActivity() {
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
                             editor.putString("default_view", "Monthly (Start month)")
+                            editor.apply()
 
                         }
                         "Yearly (365 days)" -> {
                             calendar.add(Calendar.DAY_OF_MONTH, -365)
                             pastDate = sdf.format(calendar.time)
                             editor.putString("default_view", "Yearly (365 days)")
+                            editor.apply()
 
                         }
                         "Yearly (This year)" -> {
@@ -463,6 +509,7 @@ class MainActivity : AppCompatActivity() {
                             val tempDate = calendar.time
                             pastDate = sdf.format(tempDate)
                             editor.putString("default_view", "Yearly (This year)")
+                            editor.apply()
 
                         }
                     }
@@ -612,6 +659,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun dateRangeHandler(expense: List<Expense>){
         val formatter = SimpleDateFormat("dd-MM-yyyy")
+
+        Log.v("aaaaaaainDateHandler", expense.toString())
 
         for (item in expense) {
             val timestamp = item.date?.toLong()
