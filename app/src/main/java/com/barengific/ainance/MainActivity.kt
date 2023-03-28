@@ -268,10 +268,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.fab3.setOnClickListener {
-            onCreateSumDialog()
+            onCreateCategorySearchDialog()
         }
 
         binding.fab4.setOnClickListener {
+            onCreateSumDialog()
+        }
+        binding.fab5.setOnClickListener {
             onCreateRangeDialog()
         }
 
@@ -336,6 +339,53 @@ class MainActivity : AppCompatActivity() {
             }
 
         } ?: throw IllegalStateException("Activity cannot be null")
+    }
+
+    private fun onCreateCategorySearchDialog(): Dialog {
+        return this.let { it ->
+            val builder = AlertDialog.Builder(it)
+
+            val inflater = this.layoutInflater
+            val view: View = inflater.inflate(R.layout.dialog_category_search, null)
+
+            val room = Room.databaseBuilder(
+                applicationContext,
+                AppDatabase::class.java,
+                "database-names"
+            )
+                .allowMainThreadQueries()
+                .build()
+            val categoryDao = room.categoryDao()
+
+            val cats = categoryDao.getAll()
+            val names = cats.map { it.name }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
+            view.findViewById<AutoCompleteTextView>(R.id.actCategorySearch).setAdapter(adapter)
+
+            builder.setView(view)
+                // Add action buttons
+                .setPositiveButton("Search"
+                ) { _, _ ->
+                    val expenseDao = room.expenseDao()
+
+                    binding.actCategory.text.toString()
+                    val catSearch = expenseDao.findByCategory(
+                        view.findViewById<AutoCompleteTextView>(R.id.actCategorySearch).text.toString())
+
+                    dateRangeHandler(catSearch)
+
+                }
+                .setNegativeButton(R.string.cancel
+                ) { _, _ ->
+
+                }
+
+            builder.create().apply {
+                show()
+            }
+
+        } ?: throw IllegalStateException("Activity cannot be null")
+
     }
 
     private fun onCreateSumDialog(): Dialog {
