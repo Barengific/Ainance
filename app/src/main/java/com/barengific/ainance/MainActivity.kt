@@ -473,11 +473,91 @@ class MainActivity : AppCompatActivity() {
                 ) { _, _ ->
                     val expenseDao = room.expenseDao()
 
-                    binding.actCategory.text.toString()
-                    val catSearch = expenseDao.findByCategory(
-                        view.findViewById<AutoCompleteTextView>(R.id.actCategorySearch).text.toString())
+                    val matchDate = view.findViewById<Switch>(R.id.switchCate).isChecked
 
-                    dateRangeHandler(catSearch)
+                    var catSearch: List<Expense> = emptyList()
+                    if (!matchDate){
+                        catSearch = expenseDao.findByCategory(
+                            view.findViewById<AutoCompleteTextView>
+                                (R.id.actCategorySearch).text.toString())
+                    }else if(matchDate){
+                        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                        val currentDate = sdf.format(Date())
+                        val calendar = Calendar.getInstance()
+                        calendar.time = Date()
+
+                        var pastDate = ""
+                        val sharedPreferences = getSharedPreferences("default_view_prefs", Context.MODE_PRIVATE)
+                        val value = sharedPreferences.getString("default_view", "")
+
+                        if (sharedPreferences.contains("default_view")) {
+
+                            when (value.toString()) {
+                                "Daily" -> {
+                                    pastDate = currentDate
+                                }
+                                "Weekly (7 days)" -> {
+                                    calendar.add(Calendar.DAY_OF_MONTH, -7)
+                                    pastDate = sdf.format(calendar.time)
+                                }
+                                "Weekly (Start of week)" -> {
+                                    calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                                    calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, -1)
+                                    val tempDate = calendar.time
+                                    pastDate = sdf.format(tempDate)
+                                }
+                                "Monthly (30 days)" -> {
+                                    calendar.add(Calendar.DAY_OF_MONTH, -30)
+                                    pastDate = sdf.format(calendar.time)
+                                }
+                                "Monthly (Start month)" -> {
+                                    calendar.set(Calendar.DAY_OF_MONTH, 1)
+                                    val tempDate = calendar.time
+                                    pastDate = sdf.format(tempDate)
+                                }
+                                "Yearly (365 days)" -> {
+                                    calendar.add(Calendar.DAY_OF_MONTH, -365)
+                                    pastDate = sdf.format(calendar.time)
+                                }
+                                "Yearly (This year)" -> {
+                                    calendar.set(Calendar.MONTH, Calendar.JANUARY)
+                                    calendar.set(Calendar.DAY_OF_YEAR, 1)
+                                    val tempDate = calendar.time
+                                    pastDate = sdf.format(tempDate)
+                                }
+                            }
+
+                        } else {
+                            val editor = sharedPreferences.edit()
+                            editor.putString("default_view", "Monthly (Start month)")
+                            editor.apply()
+
+                            calendar.set(Calendar.DAY_OF_MONTH, 1)
+                            val tempDate = calendar.time
+                            pastDate = sdf.format(tempDate)
+
+                        }
+
+                        val datePast = sdf.parse(pastDate)
+                        val pastDateMilliseconds = datePast?.time ?: 0
+
+                        val date = sdf.parse(currentDate)
+                        val currentDateMilliseconds = date?.time ?: 0
+
+                        val arrr = expenseDao.getExpensesInDateRange(pastDateMilliseconds.toString(),
+                            currentDateMilliseconds.toString())
+
+                        catSearch = arrr.filter { it.category ==
+                                view.findViewById<AutoCompleteTextView>(R.id.actCategorySearch).text.toString()}
+
+                    }
+
+
+                    if (!view.findViewById<AutoCompleteTextView>
+                            (R.id.actCategorySearch).text.toString().isNullOrEmpty()){
+                        dateRangeHandler(catSearch)
+                    }
+
 
                 }
                 .setNegativeButton(R.string.cancel
